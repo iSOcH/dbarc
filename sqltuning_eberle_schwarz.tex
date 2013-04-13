@@ -20,6 +20,8 @@
 
 \section{Einleitung}
 
+
+
 \section{Statistiken}
 \subsection{Statistiken sammeln}
 Mit dem folgenden Befehl werden die Statistiken für alle Tabellen aufgebaut:
@@ -59,6 +61,117 @@ SUPPLIERS                           10000        220         17    1440000
 \end{lstlisting}
 
 
+\section{Ausführungsplan}
+Die Ausführung des EXPLAIN PLAN-Befehles erzeugt folgende Ausgabe:
+\begin{lstlisting}
+plan FOR succeeded.
+\end{lstlisting}
+
+Und die Abfrage des Ausführungsplans zeigt erwartungsgemäss einen kompletten Tabellenzugriff, da das SELECT-Statement ja keine WHERE-Klausel verwendet.
+\begin{lstlisting}
+PLAN_TABLE_OUTPUT                                                                                                                                                                                                                                                                                          
+---------------------------------------------------------------------------
+Plan hash value: 3931018009                                                                                                                                                                                                                                                                                  
+                                                                                                                                                                                                                                                                                                             
+---------------------------------------------------------------------------                                                                                                                                                                                                                                  
+| Id  | Operation         | Name  | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                                                  
+---------------------------------------------------------------------------                                                                                                                                                                                                                                  
+|   0 | SELECT STATEMENT  |       |   200K|    25M|  1051   (1)| 00:00:13 |                                                                                                                                                                                                                                  
+|   1 |  TABLE ACCESS FULL| PARTS |   200K|    25M|  1051   (1)| 00:00:13 |                                                                                                                                                                                                                                  
+---------------------------------------------------------------------------     
+\end{lstlisting}
+
+
+\section{Versuche ohne Index}
+\subsection{Projektion}
+\subsubsection{* FROM}
+Das erste Statement (SELECT * FROM...) erzeugt einen Output sehr ähnlich dem bereits Gezeigten. Es werden sämtliche 1.5 Millionen Zeilen der Tabelle gelesen. Da es sich dabei primär um I/O handelt, ist der Anteil der CPU an den Kosten mit lediglich einem Prozent entsprechend gering.
+\begin{lstlisting}
+----------------------------------------------------------------------------                                                                                                                                                                                                                                 
+| Id  | Operation         | Name   | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                                                 
+----------------------------------------------------------------------------                                                                                                                                                                                                                                 
+|   0 | SELECT STATEMENT  |        |  1500K|   158M|  6610   (1)| 00:01:20 |                                                                                                                                                                                                                                 
+|   1 |  TABLE ACCESS FULL| ORDERS |  1500K|   158M|  6610   (1)| 00:01:20 |                                                                                                                                                                                                                                 
+---------------------------------------------------------------------------- 
+\end{lstlisting}
+
+\subsubsection{o\_clerk FROM}
+Bei der Projektion auf eine einzige Spalte der Tabelle Orders fällt ein Grossteil der Daten weg (22M statt 158M), ansonsten sind die Unterschiede aber sehr gering. Vom Festspeicher müssen die selben Blöcke gelesen werden, erst danach können die Inhalte der nicht angefragten Spalten verworfen werden. Daher fallen auch die Kosten nur geringfügig tiefer aus.
+\begin{lstlisting}
+----------------------------------------------------------------------------                                                                                                                                                                                                                                 
+| Id  | Operation         | Name   | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                                                 
+----------------------------------------------------------------------------                                                                                                                                                                                                                                 
+|   0 | SELECT STATEMENT  |        |  1500K|    22M|  6607   (1)| 00:01:20 |                                                                                                                                                                                                                                 
+|   1 |  TABLE ACCESS FULL| ORDERS |  1500K|    22M|  6607   (1)| 00:01:20 |                                                                                                                                                                                                                                 
+----------------------------------------------------------------------------
+\end{lstlisting}
+
+\subsubsection{DISTINCT o\_clerk FROM}
+Für das SELECT DISTINCT Statement werden in einem ersten Schritt (Id:2) wiederum alle Daten der entsprechenden Spalte der Tabelle geladen (Kosten wiederum 6607). Danach werden mittels HASH UNIQUE die doppelt vorhandenen Werte ermittelt und entfernt. Dies erzeugt noch ein wenig CPU-Last, aber senkt die Anzahl Zeilen von 1.5 Millionen auf 1000 und verringert dadurch auch den Speicherbedarf von 22M auf 16000 Bytes.
+\begin{lstlisting}
+-----------------------------------------------------------------------------                                                                                                                                                                                                                                
+| Id  | Operation          | Name   | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                                                
+-----------------------------------------------------------------------------                                                                                                                                                                                                                                
+|   0 | SELECT STATEMENT   |        |  1000 | 16000 |  6676   (2)| 00:01:21 |                                                                                                                                                                                                                                
+|   1 |  HASH UNIQUE       |        |  1000 | 16000 |  6676   (2)| 00:01:21 |                                                                                                                                                                                                                                
+|   2 |   TABLE ACCESS FULL| ORDERS |  1500K|    22M|  6607   (1)| 00:01:20 |                                                                                                                                                                                                                                
+----------------------------------------------------------------------------- 
+\end{lstlisting}
+
+\subsection{Selektion}
+\subsubsection{Exact Point}
+Obwohl das Exact-Point Query lediglich eine einzige Zeile zurückliefert fallen die Kosten mit 6602 beinahe so hoch wie bei der Projektion auf eine einzige Spalte der selben Tabelle (ohne Selektion) aus. Da kein Index für diese Spalte vorhanden ist, kann das Datenbanksystem die Abfrage nicht effizienter als mittels linearer Suche ausführen.
+\begin{lstlisting}
+----------------------------------------------------------------------------                                                                                                                                                                                                                                 
+| Id  | Operation         | Name   | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                                                 
+----------------------------------------------------------------------------                                                                                                                                                                                                                                 
+|   0 | SELECT STATEMENT  |        |     1 |   111 |  6602   (1)| 00:01:20 |                                                                                                                                                                                                                                 
+|*  1 |  TABLE ACCESS FULL| ORDERS |     1 |   111 |  6602   (1)| 00:01:20 |                                                                                                                                                                                                                                 
+----------------------------------------------------------------------------                                                                                                                                                                                                                                 
+                                                                                                                                                                                                                                                                                                             
+Predicate Information (identified by operation id):                                                                                                                                                                                                                                                          
+---------------------------------------------------                                                                                                                                                                                                                                                          
+                                                                                                                                                                                                                                                                                                             
+   1 - filter("O_ORDERKEY"=44444) 
+\end{lstlisting}
+
+\subsubsection{Partial Point, OR}
+Die OR-Verknüpften Bedingungen und die daraus resultierende höhere Anzahl an zurückzugebenden Zeilen erhöhen die Kosten gegenüber dem Exact Point Query noch ein wenig. Weiterhin dürfte aber die Notwendigkeit des Lesens der gesammten Tabelle für die lineare Suche den grössten Teil der Kosten ausmachen.
+
+\begin{lstlisting}
+----------------------------------------------------------------------------                                                                                                                                                                                                                                 
+| Id  | Operation         | Name   | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                                                 
+----------------------------------------------------------------------------                                                                                                                                                                                                                                 
+|   0 | SELECT STATEMENT  |        |  1501 |   162K|  6629   (1)| 00:01:20 |                                                                                                                                                                                                                                 
+|*  1 |  TABLE ACCESS FULL| ORDERS |  1501 |   162K|  6629   (1)| 00:01:20 |                                                                                                                                                                                                                                 
+----------------------------------------------------------------------------                                                                                                                                                                                                                                 
+                                                                                                                                                                                                                                                                                                             
+Predicate Information (identified by operation id):                                                                                                                                                                                                                                                          
+---------------------------------------------------                                                                                                                                                                                                                                                          
+                                                                                                                                                                                                                                                                                                             
+   1 - filter("O_CLERK"='Clerk#000000286' OR "O_ORDERKEY"=44444)    
+\end{lstlisting}
+
+\subsubsection{Partial Point, AND}
+
+
+\subsubsection{Partial Point, AND und Funktion}
+
+\subsection{Join}
+
+
+
+\section{Versuche mit Index}
+\subsection{Erzeugung Indices}
+
+
+\subsection{Projektion}
+
+
+\subsection{Selektion}
+
+
+\subsection{Join}
 
 
 \end{document}
