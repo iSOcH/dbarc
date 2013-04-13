@@ -1,0 +1,64 @@
+\documentclass[11pt,a4paper,parskip=half]{scrartcl}
+\usepackage{ngerman}
+\usepackage[utf8]{inputenc}
+\usepackage[colorlinks=false,pdfborder={0 0 0}]{hyperref}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{longtable}
+\usepackage{float}
+\usepackage{textcomp}
+\usepackage{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\geometry{a4paper, left=30mm, right=25mm, top=30mm, bottom=35mm} 
+\usepackage{listings}
+\lstset{breaklines=true, breakatwhitespace=true, basicstyle=\scriptsize, numbers=left}
+\title{dbarc: Ausarbeitung SQLTuning}
+\author{Yanick Eberle, Pascal Schwarz}
+\begin{document}
+\maketitle
+
+\section{Einleitung}
+
+\section{Statistiken}
+\subsection{Statistiken sammeln}
+Mit dem folgenden Befehl werden die Statistiken für alle Tabellen aufgebaut:
+\begin{lstlisting}
+BEGIN
+  DBMS_STATS.GATHER_TABLE_STATS('dbarc02','customers');
+  DBMS_STATS.GATHER_TABLE_STATS('dbarc02','lineitems');
+  DBMS_STATS.GATHER_TABLE_STATS('dbarc02','nations');
+  DBMS_STATS.GATHER_TABLE_STATS('dbarc02','orders');
+  DBMS_STATS.GATHER_TABLE_STATS('dbarc02','parts');
+  DBMS_STATS.GATHER_TABLE_STATS('dbarc02','partsupps');
+  DBMS_STATS.GATHER_TABLE_STATS('dbarc02','regions');
+  DBMS_STATS.GATHER_TABLE_STATS('dbarc02','suppliers');
+END;
+\end{lstlisting}
+
+\subsection{Zeilen, Bytes, Blöcke und Extents der Tabellen}
+Um die Anzahl Extents festzustellen, haben wir uns Informationen der Tabelle \emph{DBA\_SEGMENTS} bedient. Eine kurze Google-Recherche führte uns auf die Seite \url{http://www.rocket99.com/techref/oracle8409.html}, die uns bei dieser Aufgabe behilflich war.
+
+\begin{lstlisting}
+SELECT stat.table_name, stat.num_rows, stat.blocks, seg.extents,
+  stat.avg_row_len*stat.num_rows AS size_bytes
+FROM user_tab_statistics stat
+JOIN DBA_SEGMENTS seg ON (stat.table_name = seg.segment_name)
+WHERE seg.owner = 'DBARC02'
+
+TABLE_NAME                       NUM_ROWS     BLOCKS    EXTENTS SIZE_BYTES
+------------------------------ ---------- ---------- ---------- ----------
+CUSTOMERS                          150000       3494         43   23850000 
+LINEITEMS                         6001215     109217        179  750151875 
+NATIONS                                25          4          1       2675 
+ORDERS                            1500000      24284         95  166500000 
+PARTS                              200000       3859         46   26400000 
+PARTSUPPS                          800000      16650         88  114400000 
+REGIONS                                 5          4          1        480 
+SUPPLIERS                           10000        220         17    1440000 
+\end{lstlisting}
+
+
+
+
+\end{document}
