@@ -13,7 +13,7 @@
 \usepackage{nameref}
 \geometry{a4paper, left=30mm, right=25mm, top=30mm, bottom=35mm} 
 \usepackage{listings}
-\lstset{breaklines=true, breakatwhitespace=true, basicstyle=\scriptsize, numbers=left}
+\lstset{breaklines=true, breakatwhitespace=true, basicstyle=\tiny, numbers=left}
 \setcounter{tocdepth}{2} %no subsubsections in TOC
 
 \title{dbarc: Ausarbeitung SQLTuning}
@@ -297,15 +297,64 @@ c_custkey = o_custkey;
 
 \section{Versuche mit Index}
 \subsection{Erzeugung Indices}
+Die Indices werden gemäss den Befehlen aus der Aufgabenstellung erstellt (Zeilen 4 und 5 sind Output):
+\begin{lstlisting}
+CREATE INDEX o_orderkey_ix ON orders(o_orderkey);
+CREATE INDEX o_clerk_ix ON orders(o_clerk);
 
+index O_ORDERKEY_IX created.
+index O_CLERK_IX created.
+\end{lstlisting}
+
+Die Indices sind 30 resp. 48 MByte gross. Zusammen kommen sie somit beinahe auf die halbe Grösse der Tabelle \emph{ORDERS} (ca. 160 MByte). Die Grösse der Indices haben wir gemäss folgendem Output festgestellt:
+\begin{lstlisting}
+SELECT SEGMENT_NAME, BYTES
+FROM DBA_SEGMENTS seg
+WHERE seg.owner = 'DBARC02'
+AND seg.segment_type = 'INDEX'
+
+SEGMENT_NAME                             BYTES
+--------------------------------------- ----------
+O_ORDERKEY_IX                            30408704 
+O_CLERK_IX                               48234496 
+\end{lstlisting}
 
 \subsection{Projektion}
-beispielverweis: \ref{no-idx-join} auf Seite \pageref{no-idx-join} oder auch \ref{no-idx-join} \nameref{no-idx-join} auf Seite \pageref{no-idx-join}
+\subsubsection{DISTINCT o\_clerk FROM}
+Im Gegensatz zum Output ohne Index (siehe Abschnitt \ref{no-idx-pro-singlecol-distinct} auf Seite \pageref{no-idx-pro-singlecol-distinct}) fallen die Kosten bei der Abfrage mit Index merklich geringer aus. Der Schritt \emph{HASH UNIQUE} verursacht Kosten von 69, was gegenüber der Abfrage ohne Index keinen Unterschied darstellt. Allerdings ist der \emph{INDEX FAST FULL SCAN} viel günstiger als \emph{TABLE ACCESS FULL} (Kosten sinken von 6607 auf 1546).
 
-ziele von referenzen sind immer labels (oben jeweils gleich nach subsection etc.)
+Wir erklären uns dies dadurch, dass die Daten für das Query (lediglich Spalte \emph{O\_CLERK}) in diesem Fall direkt aus dem Index gelesen werden während ohne Index für \emph{O\_CLERK} die gesamte Tabelle von der Disk gelesen werden muss. Da der Index ca. vier mal kleiner ist als die Tabelle fallen auch die Kosten ca. viermal kleiner aus.
+
+\begin{lstlisting}
+------------------------------------------------------------------------------------                                                                                                                                                                                                                         
+| Id  | Operation             | Name       | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                                         
+------------------------------------------------------------------------------------                                                                                                                                                                                                                         
+|   0 | SELECT STATEMENT      |            |  1000 | 16000 |  1615   (5)| 00:00:20 |                                                                                                                                                                                                                         
+|   1 |  HASH UNIQUE          |            |  1000 | 16000 |  1615   (5)| 00:00:20 |                                                                                                                                                                                                                         
+|   2 |   INDEX FAST FULL SCAN| O_CLERK_IX |  1500K|    22M|  1546   (1)| 00:00:19 |                                                                                                                                                                                                                         
+------------------------------------------------------------------------------------
+\end{lstlisting}
+
+\subsubsection{* FROM}
+Führen wir dasselbe Query wie in Abschnitt \ref{no-idx-pro-all} auf Seite \pageref{no-idx-pro-all} aus, sehen wir einen gegenüber der Variante ohne Index unveränderten Ausführungsplan.
 
 \subsection{Selektion}
-
+\subsubsection{Exact Point}
+Das Exact Point Query profitiert in enormem Ausmass vom Index auf \emph{O\_ORDERKEY} (Kosten sinken von 6602 auf 4, vgl. Abschnitt \ref{no-idx-sel-exactpoint} auf Seite \pageref{no-idx-sel-exactpoint}). Zunächst wird im Index der Eintrag mit dem entsprechenden Wert gesucht und dann die im Index enthaltene ROWID für den Zugriff auf die Tabelle benutzt (\emph{TABLE ACCESS BY INDEX ROWID}). Der Zugriff auf die Tabelle ist notwendig, da wir die ganze Zeile und nicht nur das Feld mit dem Index ausgeben möchten.
+\begin{lstlisting}
+---------------------------------------------------------------------------------------------                                                                                                                                                                                                                
+| Id  | Operation                   | Name          | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                                
+---------------------------------------------------------------------------------------------                                                                                                                                                                                                                
+|   0 | SELECT STATEMENT            |               |     1 |   111 |     4   (0)| 00:00:01 |                                                                                                                                                                                                                
+|   1 |  TABLE ACCESS BY INDEX ROWID| ORDERS        |     1 |   111 |     4   (0)| 00:00:01 |                                                                                                                                                                                                                
+|*  2 |   INDEX RANGE SCAN          | O_ORDERKEY_IX |     1 |       |     3   (0)| 00:00:01 |                                                                                                                                                                                                                
+---------------------------------------------------------------------------------------------                                                                                                                                                                                                                
+                                                                                                                                                                                                                                                                                                             
+Predicate Information (identified by operation id):                                                                                                                                                                                                                                                          
+---------------------------------------------------                                                                                                                                                                                                                                                          
+                                                                                                                                                                                                                                                                                                             
+   2 - access("O_ORDERKEY"=44444)    
+\end{lstlisting}
 
 \subsection{Join}
 
