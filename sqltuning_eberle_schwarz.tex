@@ -220,7 +220,7 @@ Predicate Information (identified by operation id):
    1 - filter("O_ORDERKEY"<=222222 AND "O_ORDERKEY">=111111)  
 \end{lstlisting}
 
-Die grösse des Intervalls spielt in diesem Fall praktisch keine Rolle:
+Die Grösse des Intervalls spielt in diesem Fall praktisch keine Rolle:
 \begin{lstlisting}
 ----------------------------------------------------------------------------                                                                                                                                                                                                                                 
 | Id  | Operation         | Name   | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                                                 
@@ -340,7 +340,7 @@ Führen wir dasselbe Query wie in Abschnitt \ref{no-idx-pro-all} auf Seite \page
 
 \subsection{Selektion}
 \subsubsection{Exact Point}
-Das Exact Point Query profitiert in enormem Ausmass vom Index auf \emph{O\_ORDERKEY} (Kosten sinken von 6602 auf 4, vgl. Abschnitt \ref{no-idx-sel-exactpoint} auf Seite \pageref{no-idx-sel-exactpoint}). Zunächst wird im Index der Eintrag mit dem entsprechenden Wert gesucht und dann die im Index enthaltene ROWID für den Zugriff auf die Tabelle benutzt (\emph{TABLE ACCESS BY INDEX ROWID}). Der Zugriff auf die Tabelle ist notwendig, da wir die ganze Zeile und nicht nur das Feld mit dem Index ausgeben möchten.
+Das Exact Point Query profitiert in enormem Ausmass vom Index auf \emph{O\_ORDERKEY} (Kosten sinken von 6602 auf 4, vgl. Abschnitt \ref{no-idx-sel-exactpoint} auf Seite \pageref{no-idx-sel-exactpoint}). Zunächst wird im Index der Eintrag mit dem entsprechenden Wert von \emph{O\_ORDERKEY} gesucht und dann die im Index enthaltene ROWID für den Zugriff auf die Tabelle benutzt (\emph{TABLE ACCESS BY INDEX ROWID}). Der Zugriff auf die Tabelle ist notwendig, da wir die ganze Zeile und nicht nur das Feld mit dem Index ausgeben möchten.
 \begin{lstlisting}
 ---------------------------------------------------------------------------------------------                                                                                                                                                                                                                
 | Id  | Operation                   | Name          | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                                
@@ -355,6 +355,8 @@ Predicate Information (identified by operation id):
                                                                                                                                                                                                                                                                                                              
    2 - access("O_ORDERKEY"=44444)    
 \end{lstlisting}
+
+Verwenden wir den Hint \emph{FULL(orders)} im Statement, erhalten wir den selben Ausführungsplan wie in Abschnitt \ref{no-idx-sel-exactpoint} auf Seite \pageref{no-idx-sel-exactpoint}. Dann wird der Zugriff auf die gesuchte Zeile nicht über den Index vorgenommen.
 
 \subsection{Join}
 
