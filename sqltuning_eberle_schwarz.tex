@@ -418,15 +418,268 @@ Predicate Information (identified by operation id):
 \end{lstlisting}
 
 \subsubsection{Range Query}
+Intervallgrösse??
+\begin{lstlisting}
+---------------------------------------------------------------------------------------------                                                                                                                                                                                                                
+| Id  | Operation                   | Name          | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                                
+---------------------------------------------------------------------------------------------                                                                                                                                                                                                                
+|   0 | SELECT STATEMENT            |               | 27780 |  3011K|   932   (1)| 00:00:12 |                                                                                                                                                                                                                
+|   1 |  TABLE ACCESS BY INDEX ROWID| ORDERS        | 27780 |  3011K|   932   (1)| 00:00:12 |                                                                                                                                                                                                                
+|*  2 |   INDEX RANGE SCAN          | O_ORDERKEY_IX | 27780 |       |    68   (0)| 00:00:01 |                                                                                                                                                                                                                
+---------------------------------------------------------------------------------------------                                                                                                                                                                                                                
+                                                                                                                                                                                                                                                                                                             
+Predicate Information (identified by operation id):                                                                                                                                                                                                                                                          
+---------------------------------------------------                                                                                                                                                                                                                                                          
+                                                                                                                                                                                                                                                                                                             
+   2 - access("O_ORDERKEY">=111111 AND "O_ORDERKEY"<=222222)                                                                                                                                                                                                                                                 
+\end{lstlisting}
 
 
 \subsubsection{Partial Range Query}
+\begin{lstlisting}
+--------------------------------------------------------------------------------------------------                                                                                                                                                                                                           
+| Id  | Operation                        | Name          | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                           
+--------------------------------------------------------------------------------------------------                                                                                                                                                                                                           
+|   0 | SELECT STATEMENT                 |               |     6 |   666 |    27  (12)| 00:00:01 |                                                                                                                                                                                                           
+|   1 |  TABLE ACCESS BY INDEX ROWID     | ORDERS        |     6 |   666 |    27  (12)| 00:00:01 |                                                                                                                                                                                                           
+|   2 |   BITMAP CONVERSION TO ROWIDS    |               |       |       |            |          |                                                                                                                                                                                                           
+|   3 |    BITMAP AND                    |               |       |       |            |          |                                                                                                                                                                                                           
+|   4 |     BITMAP CONVERSION FROM ROWIDS|               |       |       |            |          |                                                                                                                                                                                                           
+|   5 |      SORT ORDER BY               |               |       |       |            |          |                                                                                                                                                                                                           
+|*  6 |       INDEX RANGE SCAN           | O_ORDERKEY_IX |  2780 |       |     9   (0)| 00:00:01 |                                                                                                                                                                                                           
+|   7 |     BITMAP CONVERSION FROM ROWIDS|               |       |       |            |          |                                                                                                                                                                                                           
+|   8 |      SORT ORDER BY               |               |       |       |            |          |                                                                                                                                                                                                           
+|*  9 |       INDEX RANGE SCAN           | O_CLERK_IX    |  2780 |       |    14   (0)| 00:00:01 |                                                                                                                                                                                                           
+--------------------------------------------------------------------------------------------------                                                                                                                                                                                                           
+                                                                                                                                                                                                                                                                                                             
+Predicate Information (identified by operation id):                                                                                                                                                                                                                                                          
+---------------------------------------------------                                                                                                                                                                                                                                                          
+                                                                                                                                                                                                                                                                                                             
+   6 - access("O_ORDERKEY">=44444 AND "O_ORDERKEY"<=55555)                                                                                                                                                                                                                                                   
+   9 - access("O_CLERK">='Clerk#000000130' AND "O_CLERK"<='Clerk#000000139')                                                                                                                                                                                                                                 
+\end{lstlisting}
 
 
 \subsection{Join}
+\subsubsection{Join}
+Normal:
+\begin{lstlisting}
+----------------------------------------------------------------------------------------                                                                                                                                                                                                                     
+| Id  | Operation          | Name      | Rows  | Bytes |TempSpc| Cost (%CPU)| Time     |                                                                                                                                                                                                                     
+----------------------------------------------------------------------------------------                                                                                                                                                                                                                     
+|   0 | SELECT STATEMENT   |           |  1500K|   386M|       | 17514   (1)| 00:03:31 |                                                                                                                                                                                                                     
+|*  1 |  HASH JOIN         |           |  1500K|   386M|    24M| 17514   (1)| 00:03:31 |                                                                                                                                                                                                                     
+|   2 |   TABLE ACCESS FULL| CUSTOMERS |   150K|    22M|       |   951   (1)| 00:00:12 |                                                                                                                                                                                                                     
+|   3 |   TABLE ACCESS FULL| ORDERS    |  1500K|   158M|       |  6610   (1)| 00:01:20 |                                                                                                                                                                                                                     
+----------------------------------------------------------------------------------------                                                                                                                                                                                                                     
+                                                                                                                                                                                                                                                                                                             
+Predicate Information (identified by operation id):                                                                                                                                                                                                                                                          
+---------------------------------------------------                                                                                                                                                                                                                                                          
+                                                                                                                                                                                                                                                                                                             
+   1 - access("O_CUSTKEY"="C_CUSTKEY")                                                                                                                                                                                                                                                                       
+\end{lstlisting}
 
+Nested Loop Join:
+Hint:
+\begin{lstlisting}
+SELECT /*+ USE_NL(customers orders) */* 
+FROM orders, customers
+WHERE o_custkey = c_custkey;
+\end{lstlisting}
+\begin{lstlisting}
+--------------------------------------------------------------------------------                                                                                                                                                                                                                             
+| Id  | Operation          | Name      | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                                             
+--------------------------------------------------------------------------------                                                                                                                                                                                                                             
+|   0 | SELECT STATEMENT   |           |  1500K|   386M|   991M  (1)|999:59:59 |                                                                                                                                                                                                                             
+|   1 |  NESTED LOOPS      |           |  1500K|   386M|   991M  (1)|999:59:59 |                                                                                                                                                                                                                             
+|   2 |   TABLE ACCESS FULL| CUSTOMERS |   150K|    22M|   951   (1)| 00:00:12 |                                                                                                                                                                                                                             
+|*  3 |   TABLE ACCESS FULL| ORDERS    |    10 |  1110 |  6608   (1)| 00:01:20 |                                                                                                                                                                                                                             
+--------------------------------------------------------------------------------                                                                                                                                                                                                                             
+                                                                                                                                                                                                                                                                                                             
+Predicate Information (identified by operation id):                                                                                                                                                                                                                                                          
+---------------------------------------------------                                                                                                                                                                                                                                                          
+                                                                                                                                                                                                                                                                                                             
+   3 - filter("O_CUSTKEY"="C_CUSTKEY")                                                                                                                                                                                                                                                                       
+\end{lstlisting}
 
-\subsection{Quiz}
+Merge Join:
+Hint:
+\begin{lstlisting}
+SELECT /*+ USE_MERGE(customers orders) */* 
+FROM orders, customers
+WHERE o_custkey = c_custkey;
+\end{lstlisting}
+\begin{lstlisting}
+-----------------------------------------------------------------------------------------                                                                                                                                                                                                                    
+| Id  | Operation           | Name      | Rows  | Bytes |TempSpc| Cost (%CPU)| Time     |                                                                                                                                                                                                                    
+-----------------------------------------------------------------------------------------                                                                                                                                                                                                                    
+|   0 | SELECT STATEMENT    |           |  1500K|   386M|       | 50568   (1)| 00:10:07 |                                                                                                                                                                                                                    
+|   1 |  MERGE JOIN         |           |  1500K|   386M|       | 50568   (1)| 00:10:07 |                                                                                                                                                                                                                    
+|   2 |   SORT JOIN         |           |   150K|    22M|    52M|  6202   (1)| 00:01:15 |                                                                                                                                                                                                                    
+|   3 |    TABLE ACCESS FULL| CUSTOMERS |   150K|    22M|       |   951   (1)| 00:00:12 |                                                                                                                                                                                                                    
+|*  4 |   SORT JOIN         |           |  1500K|   158M|   390M| 44366   (1)| 00:08:53 |                                                                                                                                                                                                                    
+|   5 |    TABLE ACCESS FULL| ORDERS    |  1500K|   158M|       |  6610   (1)| 00:01:20 |                                                                                                                                                                                                                    
+-----------------------------------------------------------------------------------------                                                                                                                                                                                                                    
+                                                                                                                                                                                                                                                                                                             
+Predicate Information (identified by operation id):                                                                                                                                                                                                                                                          
+---------------------------------------------------                                                                                                                                                                                                                                                          
+                                                                                                                                                                                                                                                                                                             
+   4 - access("O_CUSTKEY"="C_CUSTKEY")                                                                                                                                                                                                                                                                       
+       filter("O_CUSTKEY"="C_CUSTKEY")                                                                                                                                                                                                                                                                       
+\end{lstlisting}
+
+\subsubsection{Join, AND}
+Normal:
+\begin{lstlisting}
+----------------------------------------------------------------------------------------------                                                                                                                                                                                                               
+| Id  | Operation                    | Name          | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------                                                                                                                                                                                                               
+|   0 | SELECT STATEMENT             |               |    25 |  6750 |   957   (1)| 00:00:12 |                                                                                                                                                                                                               
+|*  1 |  HASH JOIN                   |               |    25 |  6750 |   957   (1)| 00:00:12 |                                                                                                                                                                                                               
+|   2 |   TABLE ACCESS BY INDEX ROWID| ORDERS        |    25 |  2775 |     4   (0)| 00:00:01 |                                                                                                                                                                                                               
+|*  3 |    INDEX RANGE SCAN          | O_ORDERKEY_IX |    25 |       |     3   (0)| 00:00:01 |                                                                                                                                                                                                               
+|   4 |   TABLE ACCESS FULL          | CUSTOMERS     |   150K|    22M|   951   (1)| 00:00:12 |                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                             
+Predicate Information (identified by operation id):                                                                                                                                                                                                                                                          
+---------------------------------------------------                                                                                                                                                                                                                                                          
+                                                                                                                                                                                                                                                                                                             
+   1 - access("O_CUSTKEY"="C_CUSTKEY")                                                                                                                                                                                                                                                                       
+   3 - access("O_ORDERKEY"<100)                                                                                                                                                                                                                                                                              
+\end{lstlisting}
+
+Nested Loop Join:
+Hint:
+\begin{lstlisting}
+SELECT /*+ USE_NL(customers orders) */*
+FROM orders, customers
+WHERE o_custkey = c_custkey
+AND o_orderkey < 100;
+\end{lstlisting}
+\begin{lstlisting}
+----------------------------------------------------------------------------------------------                                                                                                                                                                                                               
+| Id  | Operation                    | Name          | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------                                                                                                                                                                                                               
+|   0 | SELECT STATEMENT             |               |    25 |  6750 | 23747   (1)| 00:04:45 |                                                                                                                                                                                                               
+|   1 |  NESTED LOOPS                |               |    25 |  6750 | 23747   (1)| 00:04:45 |                                                                                                                                                                                                               
+|   2 |   TABLE ACCESS BY INDEX ROWID| ORDERS        |    25 |  2775 |     4   (0)| 00:00:01 |                                                                                                                                                                                                               
+|*  3 |    INDEX RANGE SCAN          | O_ORDERKEY_IX |    25 |       |     3   (0)| 00:00:01 |                                                                                                                                                                                                               
+|*  4 |   TABLE ACCESS FULL          | CUSTOMERS     |     1 |   159 |   950   (1)| 00:00:12 |                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                             
+Predicate Information (identified by operation id):                                                                                                                                                                                                                                                          
+---------------------------------------------------                                                                                                                                                                                                                                                          
+                                                                                                                                                                                                                                                                                                             
+   3 - access("O_ORDERKEY"<100)                                                                                                                                                                                                                                                                              
+   4 - filter("O_CUSTKEY"="C_CUSTKEY")                                                                                                                                                                                                                                                                       
+\end{lstlisting}
+
+Merge Join:
+Hint:
+\begin{lstlisting}
+SELECT /*+ USE_MERGE(customers orders) */*
+FROM orders, customers
+WHERE o_custkey = c_custkey
+AND o_orderkey < 100;
+\end{lstlisting}
+\begin{lstlisting}
+-------------------------------------------------------------------------------------------------------                                                                                                                                                                                                      
+| Id  | Operation                     | Name          | Rows  | Bytes |TempSpc| Cost (%CPU)| Time     |                                                                                                                                                                                                      
+-------------------------------------------------------------------------------------------------------                                                                                                                                                                                                      
+|   0 | SELECT STATEMENT              |               |    25 |  6750 |       |  6207   (1)| 00:01:15 |                                                                                                                                                                                                      
+|   1 |  MERGE JOIN                   |               |    25 |  6750 |       |  6207   (1)| 00:01:15 |                                                                                                                                                                                                      
+|   2 |   SORT JOIN                   |               |    25 |  2775 |       |     5  (20)| 00:00:01 |                                                                                                                                                                                                      
+|   3 |    TABLE ACCESS BY INDEX ROWID| ORDERS        |    25 |  2775 |       |     4   (0)| 00:00:01 |                                                                                                                                                                                                      
+|*  4 |     INDEX RANGE SCAN          | O_ORDERKEY_IX |    25 |       |       |     3   (0)| 00:00:01 |                                                                                                                                                                                                      
+|*  5 |   SORT JOIN                   |               |   150K|    22M|    52M|  6202   (1)| 00:01:15 |                                                                                                                                                                                                      
+|   6 |    TABLE ACCESS FULL          | CUSTOMERS     |   150K|    22M|       |   951   (1)| 00:00:12 |                                                                                                                                                                                                      
+-------------------------------------------------------------------------------------------------------                                                                                                                                                                                                      
+                                                                                                                                                                                                                                                                                                             
+Predicate Information (identified by operation id):                                                                                                                                                                                                                                                          
+---------------------------------------------------                                                                                                                                                                                                                                                          
+                                                                                                                                                                                                                                                                                                             
+   4 - access("O_ORDERKEY"<100)                                                                                                                                                                                                                                                                              
+   5 - access("O_CUSTKEY"="C_CUSTKEY")                                                                                                                                                                                                                                                                       
+       filter("O_CUSTKEY"="C_CUSTKEY")                                                                                                                                                                                                                                                                       
+\end{lstlisting}
+
+\subsubsection{Join, INDEX}
+Als erstes haben wir den neuen Index erstellt. (Ab Zeile 3 Output)
+\begin{lstlisting}
+CREATE INDEX c_custkey_ix ON customers(c_custkey);
+
+index C_CUSTKEY_IX erstellt.
+\end{lstlisting}
+
+Normal:
+\begin{lstlisting}
+----------------------------------------------------------------------------------------                                                                                                                                                                                                                     
+| Id  | Operation          | Name      | Rows  | Bytes |TempSpc| Cost (%CPU)| Time     |                                                                                                                                                                                                                     
+----------------------------------------------------------------------------------------                                                                                                                                                                                                                     
+|   0 | SELECT STATEMENT   |           |  1500K|   386M|       | 17514   (1)| 00:03:31 |                                                                                                                                                                                                                     
+|*  1 |  HASH JOIN         |           |  1500K|   386M|    24M| 17514   (1)| 00:03:31 |                                                                                                                                                                                                                     
+|   2 |   TABLE ACCESS FULL| CUSTOMERS |   150K|    22M|       |   951   (1)| 00:00:12 |                                                                                                                                                                                                                     
+|   3 |   TABLE ACCESS FULL| ORDERS    |  1500K|   158M|       |  6610   (1)| 00:01:20 |                                                                                                                                                                                                                     
+----------------------------------------------------------------------------------------                                                                                                                                                                                                                     
+                                                                                                                                                                                                                                                                                                             
+Predicate Information (identified by operation id):                                                                                                                                                                                                                                                          
+---------------------------------------------------                                                                                                                                                                                                                                                          
+                                                                                                                                                                                                                                                                                                             
+   1 - access("O_CUSTKEY"="C_CUSTKEY")                                                                                                                                                                                                                                                                       
+\end{lstlisting}
+
+Nested Loop Join:
+Hint:
+\begin{lstlisting}
+SELECT /*+ USE_NL(customers orders) */*
+FROM orders, customers
+WHERE o_custkey = c_custkey;
+\end{lstlisting}
+\begin{lstlisting}
+---------------------------------------------------------------------------------------------                                                                                                                                                                                                                
+| Id  | Operation                    | Name         | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                                
+---------------------------------------------------------------------------------------------                                                                                                                                                                                                                
+|   0 | SELECT STATEMENT             |              |  1500K|   386M|  3007K  (1)| 10:01:34 |                                                                                                                                                                                                                
+|   1 |  NESTED LOOPS                |              |       |       |            |          |                                                                                                                                                                                                                
+|   2 |   NESTED LOOPS               |              |  1500K|   386M|  3007K  (1)| 10:01:34 |                                                                                                                                                                                                                
+|   3 |    TABLE ACCESS FULL         | ORDERS       |  1500K|   158M|  6610   (1)| 00:01:20 |                                                                                                                                                                                                                
+|*  4 |    INDEX RANGE SCAN          | C_CUSTKEY_IX |     1 |       |     1   (0)| 00:00:01 |                                                                                                                                                                                                                
+|   5 |   TABLE ACCESS BY INDEX ROWID| CUSTOMERS    |     1 |   159 |     2   (0)| 00:00:01 |                                                                                                                                                                                                                
+---------------------------------------------------------------------------------------------                                                                                                                                                                                                                
+                                                                                                                                                                                                                                                                                                             
+Predicate Information (identified by operation id):                                                                                                                                                                                                                                                          
+---------------------------------------------------                                                                                                                                                                                                                                                          
+                                                                                                                                                                                                                                                                                                             
+   4 - access("O_CUSTKEY"="C_CUSTKEY")                                                                                                                                                                                                                                                                       
+\end{lstlisting}
+
+Merge Join:
+Hint:
+\begin{lstlisting}
+SELECT /*+ USE_MERGE(customers orders) */*
+FROM orders, customers
+WHERE o_custkey = c_custkey;
+\end{lstlisting}
+\begin{lstlisting}
+-----------------------------------------------------------------------------------------                                                                                                                                                                                                                    
+| Id  | Operation           | Name      | Rows  | Bytes |TempSpc| Cost (%CPU)| Time     |                                                                                                                                                                                                                    
+-----------------------------------------------------------------------------------------                                                                                                                                                                                                                    
+|   0 | SELECT STATEMENT    |           |  1500K|   386M|       | 50568   (1)| 00:10:07 |                                                                                                                                                                                                                    
+|   1 |  MERGE JOIN         |           |  1500K|   386M|       | 50568   (1)| 00:10:07 |                                                                                                                                                                                                                    
+|   2 |   SORT JOIN         |           |   150K|    22M|    52M|  6202   (1)| 00:01:15 |                                                                                                                                                                                                                    
+|   3 |    TABLE ACCESS FULL| CUSTOMERS |   150K|    22M|       |   951   (1)| 00:00:12 |                                                                                                                                                                                                                    
+|*  4 |   SORT JOIN         |           |  1500K|   158M|   390M| 44366   (1)| 00:08:53 |                                                                                                                                                                                                                    
+|   5 |    TABLE ACCESS FULL| ORDERS    |  1500K|   158M|       |  6610   (1)| 00:01:20 |                                                                                                                                                                                                                    
+-----------------------------------------------------------------------------------------                                                                                                                                                                                                                    
+                                                                                                                                                                                                                                                                                                             
+Predicate Information (identified by operation id):                                                                                                                                                                                                                                                          
+---------------------------------------------------                                                                                                                                                                                                                                                          
+                                                                                                                                                                                                                                                                                                             
+   4 - access("O_CUSTKEY"="C_CUSTKEY")                                                                                                                                                                                                                                                                       
+       filter("O_CUSTKEY"="C_CUSTKEY")                                                                                                                                                                                                                                                                       
+\end{lstlisting}
+
+\section{Quiz}
 Ohne Optimierung werden von jeder Tabelle sämtliche Zeilen gelesen. Dies hat enorme Kosten zur Folge hat. Die Operation TABLE ACCESS FULL kostet auf der Tabelle LINEITEMS 29675, auf der Tabelle PARTS 1052 und auf der Tabelle PARTSUPPS 4525. Der erste HASH JOIN auf PARTSUPPS und PARTS kostet 295. Der zweite HASH JOIN auf LINEITEMS und den ersten HASH JOIN kostet 30. Der HASH JOIN ist sehr CPU intensiv. Ebenfalls ist erkennbar, dass die Abfrage durch die grosse Datenmenge relativ lange dauert. Da es sich um ein COUNT handelt, wird die Anzahl Zeilen am Ende auf 1 reduziert.
 \begin{lstlisting}
 ----------------------------------------------------------------------------------                                                                                                                                                                                                                           
@@ -453,7 +706,7 @@ Predicate Information (identified by operation id):
               BRUSHED COPPER')                                                                                                                                                                                                                                                                               
 \end{lstlisting}
 
-Um die Abfrage zu optimieren, haben wir folgende Indices erstellt. (Ab Zeile 6 Output):\\
+Um die Abfrage zu optimieren, haben wir folgende Indices erstellt. (Ab Zeile 6 Output):
 \begin{lstlisting}
 CREATE INDEX p_partkey_ix ON parts (p_partkey) ;
 CREATE INDEX ps_partkey_ix ON partsupps (ps_partkey) ;
@@ -505,5 +758,46 @@ Predicate Information (identified by operation id):
   13 - access("PS_SUPPKEY"="L_SUPPKEY")                                                                                                                                                                                                                                                                      
 \end{lstlisting}
 
+\section{Deep Left Join?}
+
+Mit Subselects:
+\begin{lstlisting}
+SELECT COUNT(*) FROM
+  (SELECT /*+ no_merge */ ps_partkey, ps_suppkey
+    FROM parts, partsupps
+    WHERE p_partkey=ps_partkey
+    AND ( (ps_partkey = 5 AND p_type = 'MEDIUM ANODIZED BRASS')
+    OR (ps_partkey = 5 AND p_type = 'MEDIUM BRUSHED COPPER') )) 
+  tbl_a,
+  (SELECT /*+ no_merge */ l_partkey, l_suppkey
+    FROM lineitems, orders
+    WHERE l_orderkey=o_orderkey) 
+  tbl_b
+WHERE tbl_a.ps_partkey = tbl_b.l_partkey
+AND tbl_a.ps_suppkey=tbl_b.l_suppkey;
+\end{lstlisting}
+
+Mit LEADING:
+\begin{lstlisting}
+--> http://www.oaktable.net/content/right-deep-left-deep-and-bushy-joins
+--> http://tonyhasler.wordpress.com/2008/12/27/bushy-joins/
+
+SELECT /* + LEADING()
+        USE_HASH() swap_join_inputs()
+        USE_HASH() swap_join_inputs()
+        USE_HASH() swap_join_inputs()
+        USE_HASH() swap_join_inputs()
+        */ COUNT(*)
+FROM parts, partsupps, lineitems
+WHERE p_partkey=ps_partkey
+AND ps_partkey=l_partkey
+AND ps_suppkey=l_suppkey
+AND ( (ps_partkey = 5 AND p_type = 'MEDIUM ANODIZED BRASS')
+OR (ps_partkey = 5 AND p_type = 'MEDIUM BRUSHED COPPER') );
+\end{lstlisting}
+
+\section{Eigene SQL-Anfragen}
+
+\section{Reflexion}
 
 \end{document}
