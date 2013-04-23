@@ -765,10 +765,8 @@ Mit Subselects:
 SELECT COUNT(*) FROM
   (SELECT /*+ no_merge */ ps_partkey, ps_suppkey
     FROM parts, partsupps
-    WHERE p_partkey=ps_partkey
-    AND ( (ps_partkey = 5 AND p_type = 'MEDIUM ANODIZED BRASS')
-    OR (ps_partkey = 5 AND p_type = 'MEDIUM BRUSHED COPPER') )) 
-  tbl_a,
+    WHERE p_partkey=ps_partkey)
+   tbl_a,
   (SELECT /*+ no_merge */ l_partkey, l_suppkey
     FROM lineitems, orders
     WHERE l_orderkey=o_orderkey) 
@@ -777,10 +775,40 @@ WHERE tbl_a.ps_partkey = tbl_b.l_partkey
 AND tbl_a.ps_suppkey=tbl_b.l_suppkey;
 \end{lstlisting}
 
+\begin{lstlisting}
+--------------------------------------------------------------------------------------------------                                                                                                                                                                                                           
+| Id  | Operation                | Name          | Rows  | Bytes |TempSpc| Cost (%CPU)| Time     |                                                                                                                                                                                                           
+--------------------------------------------------------------------------------------------------                                                                                                                                                                                                           
+|   0 | SELECT STATEMENT         |               |     1 |    52 |       | 57686   (1)| 00:11:33 |                                                                                                                                                                                                           
+|   1 |  SORT AGGREGATE          |               |     1 |    52 |       |            |          |                                                                                                                                                                                                           
+|*  2 |   HASH JOIN              |               |   803K|    39M|    28M| 57686   (1)| 00:11:33 |                                                                                                                                                                                                           
+|   3 |    VIEW                  |               |   792K|    19M|       |  5613   (1)| 00:01:08 |                                                                                                                                                                                                           
+|*  4 |     HASH JOIN            |               |   792K|    10M|  3328K|  5613   (1)| 00:01:08 |                                                                                                                                                                                                           
+|   5 |      INDEX FAST FULL SCAN| P_PARTKEY_IX  |   200K|   976K|       |   123   (1)| 00:00:02 |                                                                                                                                                                                                           
+|   6 |      TABLE ACCESS FULL   | PARTSUPPS     |   800K|  7031K|       |  4523   (1)| 00:00:55 |                                                                                                                                                                                                           
+|   7 |    VIEW                  |               |  6086K|   150M|       | 39649   (1)| 00:07:56 |                                                                                                                                                                                                           
+|*  8 |     HASH JOIN            |               |  6086K|   121M|    25M| 39649   (1)| 00:07:56 |                                                                                                                                                                                                           
+|   9 |      INDEX FAST FULL SCAN| O_ORDERKEY_IX |  1500K|  8789K|       |   965   (2)| 00:00:12 |                                                                                                                                                                                                           
+|  10 |      TABLE ACCESS FULL   | LINEITEMS     |  6001K|    85M|       | 29675   (1)| 00:05:57 |                                                                                                                                                                                                           
+--------------------------------------------------------------------------------------------------                                                                                                                                                                                                           
+                                                                                                                                                                                                                                                                                                             
+Predicate Information (identified by operation id):                                                                                                                                                                                                                                                          
+---------------------------------------------------                                                                                                                                                                                                                                                          
+                                                                                                                                                                                                                                                                                                             
+   2 - access("TBL_A"."PS_PARTKEY"="TBL_B"."L_PARTKEY" AND                                                                                                                                                                                                                                                   
+              "TBL_A"."PS_SUPPKEY"="TBL_B"."L_SUPPKEY")                                                                                                                                                                                                                                                      
+   4 - access("P_PARTKEY"="PS_PARTKEY")                                                                                                                                                                                                                                                                      
+   8 - access("L_ORDERKEY"="O_ORDERKEY")                                                                                                                                                                                                                                                                     
+\end{lstlisting}
+
 Mit LEADING:
 \begin{lstlisting}
 --> http://www.oaktable.net/content/right-deep-left-deep-and-bushy-joins
 --> http://tonyhasler.wordpress.com/2008/12/27/bushy-joins/
+-->https://sites.google.com/site/embtdbo/Home/sql-hint-documentation
+Zitat:
+"What Jonathan means by BUSHY is that Oracle does not execute the join of 2 or more tables and  then join that result to 2 other tables (or more) to achieve that affect you have that with Common Table Expressions (CTE) known as Subquery Factoring in Oracle (ie the "with" clause)
+Oracle only joins one table table at a time to the current result set. In order to make Oracle join the results sets from table A and B to the result set from tables C and D, you have to use subqueries and the NO_MERGE hint. Here is an example"
 
 SELECT /* + LEADING()
         USE_HASH() swap_join_inputs()
@@ -791,9 +819,7 @@ SELECT /* + LEADING()
 FROM parts, partsupps, lineitems
 WHERE p_partkey=ps_partkey
 AND ps_partkey=l_partkey
-AND ps_suppkey=l_suppkey
-AND ( (ps_partkey = 5 AND p_type = 'MEDIUM ANODIZED BRASS')
-OR (ps_partkey = 5 AND p_type = 'MEDIUM BRUSHED COPPER') );
+AND ps_suppkey=l_suppkey;
 \end{lstlisting}
 
 \section{Eigene SQL-Anfragen}
