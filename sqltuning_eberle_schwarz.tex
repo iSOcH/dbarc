@@ -400,7 +400,7 @@ Predicate Information (identified by operation id):
 \end{lstlisting}
 
 \subsubsection{Partial Point, AND mit Funktion}
-Auch das Partial Point Query mit der AND Bedingung und der Funktion profitiert vom  Index auf \emph{O\_CLERK} (Kosten sinken von 6615 auf 1464, vgl. Abschnitt \ref{no-idx-sel-partial-and-funktion} auf Seite \pageref{no-idx-sel-partial-and-funktion}). Im Gegesatz zum Query mit AND wird hier der Zugriff auf den Index \emph{O\_CLERK} gemacht und anschliessend gefiltert. Da 1500 Zeilen die Bedingung O\_CLERK='Clerk\#000000286' erfüllen sind die Kosten wesentlich höher als beim Partial Point mit AND.
+Auch das Partial Point Query mit der AND Bedingung und der Funktion profitiert vom  Index auf \emph{O\_CLERK} (Kosten sinken von 6615 auf 1464, vgl. Abschnitt \ref{no-idx-sel-partial-and-function} auf Seite \pageref{no-idx-sel-partial-and-function}). Im Gegesatz zum Query mit AND wird hier der Zugriff auf den Index \emph{O\_CLERK} gemacht und anschliessend gefiltert. Da 1500 Zeilen die Bedingung O\_CLERK='Clerk\#000000286' erfüllen sind die Kosten wesentlich höher als beim Partial Point mit AND.
 \begin{lstlisting}
 ------------------------------------------------------------------------------------------                                                                                                                                                                                                                   
 | Id  | Operation                   | Name       | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                                   
@@ -659,7 +659,7 @@ FROM orders, customers
 WHERE o_custkey = c_custkey;
 \end{lstlisting}
 
-!!!!----TODO----!!!: Das Query mit dem \emph{NESTED LOOP} kann vom zweiten Index profitieren.
+Das Query mit dem \emph{NESTED LOOP} kann vom zweiten Index profitieren. Er für einen \emph{TABLE ACCESS FULL} auf die Tabelle ORDERS durch und greift anschliessend über den Index \emph{C\_CUSTKEY} auf die Tabelle CUSTOMERS zu. Die Kosten für den \emph{NESTED LOOP} liegt ca. bei 6000000. 
 \begin{lstlisting}
 ---------------------------------------------------------------------------------------------                                                                                                                                                                                                                
 | Id  | Operation                    | Name         | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                                
@@ -751,7 +751,8 @@ CREATE INDEX ps_suppkey_ix ON partsupps (ps_suppkey) ;
 CREATE INDEX p_type_ix ON parts (p_type) ;
 \end{lstlisting}
 
-Nach dem Erstellen der Indices sind die Kosten enorm gesunken, von vorher 35577 auf neu 52. Durch die erstellten Indices werden keine TABLE ACCESS FULL Operationen mehr ausgeführt, sondern INDEX RANGE SCAN Operationen, welche nur minime Kosten verursachen. Anstelle des HASH JOIN wird neu NESTED LOOPS verwendet, welcher 
+Nach dem Erstellen der Indices sind die Kosten enorm gesunken, von vorher 35577 auf neu 52. Durch die erstellten Indices werden keine TABLE ACCESS FULL Operationen mehr ausgeführt, sondern INDEX RANGE SCAN Operationen, welche nur minime Kosten verursachen. Anstelle des HASH JOIN wird neu NESTED LOOPS verwendet. \\
+Weiter haben wir mithilfe verschiedener Hints versucht die Kosten zu senken (\emph{LEADING(...)}, \emph{USE\_HASH(...)}, \emph{USE\_MERGE(...)}, ...) jedoch verwendet Oracle hier automatisch den NESTED LOOP welcher in diesem Fall sehr effizient ist. 
 \begin{lstlisting}
 ---------------------------------------------------------------------------------------------------                                                                                                                                                                                                          
 | Id  | Operation                         | Name          | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                          
@@ -786,7 +787,16 @@ Predicate Information (identified by operation id):
 
 \section{Deep Left Join?}
 
-Mit Subselects:
+Beim Bushy Tree geht es darum, die Nodes gleichmässig zu verteilen. Eine gute Visualisierung, sowie ein Vergleich des Left Deep, Right Deep und Bushy Join ist unter \url{http://www.oaktable.net/content/right-deep-left-deep-and-bushy-joins} ersichtlich.\\
+\\
+Wir haben versucht einen Bushy Tree zu bilden, indem wir ausschliesslich Hints verwenden. Dies ist jedoch nicht möglich.
+Bei unseren Recherchen sind wir auf den Link \url{https://sites.google.com/site/embtdbo/Home/sql-hint-documentation} gestossen, in welchem beschrieben ist, dass ein Bushy Tree zwingend Subselects benötigt. Wir zitieren:
+\begin{quote}
+What Jonathan means by BUSHY is that Oracle does not execute the join of 2 or more tables and  then join that result to 2 other tables (or more) to achieve that affect you have that with Common Table Expressions (CTE) known as Subquery Factoring in Oracle (ie the 'with' clause)
+Oracle only joins one table table at a time to the current result set. In order to make Oracle join the results sets from table A and B to the result set from tables C and D, you have to use subqueries and the NO\_MERGE hint.
+\end{quote}
+
+Mithilfe den Subselects und den Hints \emph{NO\_MERGE} haben wir folgendes Query erstellt, welches einen Bushy Tree generiert:
 \begin{lstlisting}
 SELECT COUNT(*) FROM
   (SELECT /*+ no_merge */ ps_partkey, ps_suppkey
@@ -801,6 +811,34 @@ WHERE tbl_a.ps_partkey = tbl_b.l_partkey
 AND tbl_a.ps_suppkey=tbl_b.l_suppkey;
 \end{lstlisting}
 
+Ohne Indices erhalten wir Kosten von 64246. Dabei wird für jede Tabelle ein \emph{TABLE ACCESS FULL} gemacht. Der Ausführungsplan wiederspiegelt die Struktur welche unter \url{http://www.oaktable.net/content/right-deep-left-deep-and-bushy-joins} beschrieben ist. Es werden jeweils zwei Tabellen mit einem \emph{HASH\_JOIN} verknüpft und in einer View gespeichert. Die beiden Views werden wiederum mit einem \emph{HASH\_JOIN} verknüpft, was schlussendlich zum Bushy Tree führt.
+\begin{lstlisting}
+-------------------------------------------------------------------------------------------                                                                                                                                                                                                                  
+| Id  | Operation             | Name      | Rows  | Bytes |TempSpc| Cost (%CPU)| Time     |                                                                                                                                                                                                                  
+-------------------------------------------------------------------------------------------                                                                                                                                                                                                                  
+|   0 | SELECT STATEMENT      |           |     1 |    52 |       | 64246   (1)| 00:12:51 |                                                                                                                                                                                                                  
+|   1 |  SORT AGGREGATE       |           |     1 |    52 |       |            |          |                                                                                                                                                                                                                  
+|*  2 |   HASH JOIN           |           |   803K|    39M|    28M| 64246   (1)| 00:12:51 |                                                                                                                                                                                                                  
+|   3 |    VIEW               |           |   792K|    19M|       |  6540   (1)| 00:01:19 |                                                                                                                                                                                                                  
+|*  4 |     HASH JOIN         |           |   792K|    10M|  3328K|  6540   (1)| 00:01:19 |                                                                                                                                                                                                                  
+|   5 |      TABLE ACCESS FULL| PARTS     |   200K|   976K|       |  1050   (1)| 00:00:13 |                                                                                                                                                                                                                  
+|   6 |      TABLE ACCESS FULL| PARTSUPPS |   800K|  7031K|       |  4523   (1)| 00:00:55 |                                                                                                                                                                                                                  
+|   7 |    VIEW               |           |  6086K|   150M|       | 45282   (1)| 00:09:04 |                                                                                                                                                                                                                  
+|*  8 |     HASH JOIN         |           |  6086K|   121M|    25M| 45282   (1)| 00:09:04 |                                                                                                                                                                                                                  
+|   9 |      TABLE ACCESS FULL| ORDERS    |  1500K|  8789K|       |  6599   (1)| 00:01:20 |                                                                                                                                                                                                                  
+|  10 |      TABLE ACCESS FULL| LINEITEMS |  6001K|    85M|       | 29675   (1)| 00:05:57 |                                                                                                                                                                                                                  
+-------------------------------------------------------------------------------------------                                                                                                                                                                                                                  
+                                                                                                                                                                                                                                                                                                             
+Predicate Information (identified by operation id):                                                                                                                                                                                                                                                          
+---------------------------------------------------                                                                                                                                                                                                                                                          
+                                                                                                                                                                                                                                                                                                             
+   2 - access("TBL_A"."PS_PARTKEY"="TBL_B"."L_PARTKEY" AND                                                                                                                                                                                                                                                   
+              "TBL_A"."PS_SUPPKEY"="TBL_B"."L_SUPPKEY")                                                                                                                                                                                                                                                      
+   4 - access("P_PARTKEY"="PS_PARTKEY")                                                                                                                                                                                                                                                                      
+   8 - access("L_ORDERKEY"="O_ORDERKEY")                                                                                                                                                                                                                                                                     
+\end{lstlisting}
+
+Bei Verwendung der Indices sinken die Kosten von 64246 auf 57686. Die Struktur des Ausführungsplans verändert sich nicht. Es wird lediglich ein \emph{INDEX FAST FULL SCAN} anstelle des einten \emph{TABLE ACCESS FULL} verwendet. 
 \begin{lstlisting}
 --------------------------------------------------------------------------------------------------                                                                                                                                                                                                           
 | Id  | Operation                | Name          | Rows  | Bytes |TempSpc| Cost (%CPU)| Time     |                                                                                                                                                                                                           
@@ -827,28 +865,103 @@ Predicate Information (identified by operation id):
    8 - access("L_ORDERKEY"="O_ORDERKEY")                                                                                                                                                                                                                                                                     
 \end{lstlisting}
 
-Mit LEADING:
+\section{Eigene SQL-Anfragen}
+Wir haben ein Query erstellt, welches die Bestellungen zurückgibt, die einen Preis von  502742.76 haben und die Priorität 1 besitzen.
 \begin{lstlisting}
---> http://www.oaktable.net/content/right-deep-left-deep-and-bushy-joins
---> http://tonyhasler.wordpress.com/2008/12/27/bushy-joins/
--->https://sites.google.com/site/embtdbo/Home/sql-hint-documentation
-Zitat:
-"What Jonathan means by BUSHY is that Oracle does not execute the join of 2 or more tables and  then join that result to 2 other tables (or more) to achieve that affect you have that with Common Table Expressions (CTE) known as Subquery Factoring in Oracle (ie the "with" clause)
-Oracle only joins one table table at a time to the current result set. In order to make Oracle join the results sets from table A and B to the result set from tables C and D, you have to use subqueries and the NO_MERGE hint. Here is an example"
-
-SELECT /* + LEADING()
-        USE_HASH() swap_join_inputs()
-        USE_HASH() swap_join_inputs()
-        USE_HASH() swap_join_inputs()
-        USE_HASH() swap_join_inputs()
-        */ COUNT(*)
-FROM parts, partsupps, lineitems
-WHERE p_partkey=ps_partkey
-AND ps_partkey=l_partkey
-AND ps_suppkey=l_suppkey;
+SELECT *
+FROM orders
+WHERE O_ORDERPRIORITY='1-URGENT'
+AND O_TOTALPRICE = 502742.76;
 \end{lstlisting}
 
-\section{Eigene SQL-Anfragen}
+Das Query kommt auf Kosten von 6610. Es werden weder Indices noch andere Optimierungen vorgenommen.
+\begin{lstlisting}
+----------------------------------------------------------------------------                                                                                                                                                                                                                                 
+| Id  | Operation         | Name   | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                                                 
+----------------------------------------------------------------------------                                                                                                                                                                                                                                 
+|   0 | SELECT STATEMENT  |        |     1 |   111 |  6610   (1)| 00:01:20 |                                                                                                                                                                                                                                 
+|*  1 |  TABLE ACCESS FULL| ORDERS |     1 |   111 |  6610   (1)| 00:01:20 |                                                                                                                                                                                                                                 
+----------------------------------------------------------------------------                                                                                                                                                                                                                                 
+                                                                                                                                                                                                                                                                                                             
+Predicate Information (identified by operation id):                                                                                                                                                                                                                                                          
+---------------------------------------------------                                                                                                                                                                                                                                                          
+                                                                                                                                                                                                                                                                                                             
+   1 - filter("O_TOTALPRICE"=502742.76 AND "O_ORDERPRIORITY"='1-URGENT')                                                                                                                                                                                                                                     
+\end{lstlisting}
+
+Um die Kosten zu senken haben wir einen Index erstellt für den Gesamtpreis:
+\begin{lstlisting}
+CREATE INDEX o_totalprice_ix ON orders (O_TOTALPRICE) ;
+\end{lstlisting}
+
+Mit den Indices sinken die Kosten von 6610 auf 5. Die Kosten konnten also um einen Faktor von über 1000 gesenkt werden.
+\begin{lstlisting}
+-----------------------------------------------------------------------------------------------                                                                                                                                                                                                              
+| Id  | Operation                   | Name            | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                              
+-----------------------------------------------------------------------------------------------                                                                                                                                                                                                              
+|   0 | SELECT STATEMENT            |                 |     1 |   111 |     5   (0)| 00:00:01 |                                                                                                                                                                                                              
+|*  1 |  TABLE ACCESS BY INDEX ROWID| ORDERS          |     1 |   111 |     5   (0)| 00:00:01 |                                                                                                                                                                                                              
+|*  2 |   INDEX RANGE SCAN          | O_TOTALPRICE_IX |     1 |       |     3   (0)| 00:00:01 |                                                                                                                                                                                                              
+-----------------------------------------------------------------------------------------------                                                                                                                                                                                                              
+                                                                                                                                                                                                                                                                                                             
+Predicate Information (identified by operation id):                                                                                                                                                                                                                                                          
+---------------------------------------------------                                                                                                                                                                                                                                                          
+                                                                                                                                                                                                                                                                                                             
+   1 - filter("O_ORDERPRIORITY"='1-URGENT')                                                                                                                                                                                                                                                                  
+   2 - access("O_TOTALPRICE"=502742.76)                                                                                                                                                                                                                                                                      
+\end{lstlisting}
+
+Für ein weiteres Beispiel haben wir ein Query gewählt, welches alle Bestellungen eines bestimmten Kundes zurückgibt.
+\begin{lstlisting}
+SELECT * FROM orders, customers
+WHERE o_custkey = c_custkey
+AND c_name = 'Customer#000124831';
+\end{lstlisting}
+
+Die Kosten für das Query betragen ohne Optimierung 7569.
+\begin{lstlisting}
+--------------------------------------------------------------------------------                                                                                                                                                                                                                             
+| Id  | Operation          | Name      | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                                             
+--------------------------------------------------------------------------------                                                                                                                                                                                                                             
+|   0 | SELECT STATEMENT   |           |    15 |  4050 |  7569   (1)| 00:01:31 |                                                                                                                                                                                                                             
+|*  1 |  HASH JOIN         |           |    15 |  4050 |  7569   (1)| 00:01:31 |                                                                                                                                                                                                                             
+|*  2 |   TABLE ACCESS FULL| CUSTOMERS |     1 |   159 |   951   (1)| 00:00:12 |                                                                                                                                                                                                                             
+|   3 |   TABLE ACCESS FULL| ORDERS    |  1500K|   158M|  6610   (1)| 00:01:20 |                                                                                                                                                                                                                             
+--------------------------------------------------------------------------------                                                                                                                                                                                                                             
+                                                                                                                                                                                                                                                                                                             
+Predicate Information (identified by operation id):                                                                                                                                                                                                                                                          
+---------------------------------------------------                                                                                                                                                                                                                                                          
+                                                                                                                                                                                                                                                                                                             
+   1 - access("O_CUSTKEY"="C_CUSTKEY")                                                                                                                                                                                                                                                                       
+   2 - filter("C_NAME"='Customer#000124831')                                                                                                                                                                                                                                                                 
+\end{lstlisting}
+
+Für die Optimierung haben wir wiederum Indices erstellt, da dies eine der besten und einfachsten Optimierungsmöglichkeiten ist:
+\begin{lstlisting}
+CREATE INDEX o_custkey_ix ON orders(o_custkey) ;
+CREATE INDEX c_name_ix ON customers(c_name) ;
+\end{lstlisting}
+
+Die Indices haben die Kosten von 7569 auf 21 gesenkt. Dies entspricht einem Faktor von ca. 360.
+\begin{lstlisting}
+----------------------------------------------------------------------------------------------                                                                                                                                                                                                               
+| Id  | Operation                     | Name         | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------                                                                                                                                                                                                               
+|   0 | SELECT STATEMENT              |              |    15 |  4050 |    21   (0)| 00:00:01 |                                                                                                                                                                                                               
+|   1 |  NESTED LOOPS                 |              |       |       |            |          |                                                                                                                                                                                                               
+|   2 |   NESTED LOOPS                |              |    15 |  4050 |    21   (0)| 00:00:01 |                                                                                                                                                                                                               
+|   3 |    TABLE ACCESS BY INDEX ROWID| CUSTOMERS    |     1 |   159 |     4   (0)| 00:00:01 |                                                                                                                                                                                                               
+|*  4 |     INDEX RANGE SCAN          | C_NAME_IX    |     1 |       |     3   (0)| 00:00:01 |                                                                                                                                                                                                               
+|*  5 |    INDEX RANGE SCAN           | O_CUSTKEY_IX |    15 |       |     2   (0)| 00:00:01 |                                                                                                                                                                                                               
+|   6 |   TABLE ACCESS BY INDEX ROWID | ORDERS       |    15 |  1665 |    17   (0)| 00:00:01 |                                                                                                                                                                                                               
+----------------------------------------------------------------------------------------------                                                                                                                                                                                                               
+                                                                                                                                                                                                                                                                                                             
+Predicate Information (identified by operation id):                                                                                                                                                                                                                                                          
+---------------------------------------------------                                                                                                                                                                                                                                                          
+                                                                                                                                                                                                                                                                                                             
+   4 - access("C_NAME"='Customer#000124831')                                                                                                                                                                                                                                                                 
+   5 - access("O_CUSTKEY"="C_CUSTKEY")                                                                                                                                                                                                                                                                       
+\end{lstlisting}
 
 \section{Reflexion}
 
