@@ -359,7 +359,7 @@ Predicate Information (identified by operation id):
 Verwenden wir den Hint \emph{FULL(orders)} im Statement, erhalten wir den selben Ausführungsplan wie in Abschnitt \ref{no-idx-sel-exactpoint} auf Seite \pageref{no-idx-sel-exactpoint}. Dann wird der Zugriff auf die gesuchte Zeile nicht über den Index vorgenommen.
 
 \subsubsection{Partial Point, OR}
-
+Das Partial Point Query mit der OR Bedingung profitiert vom Index auf \emph{O\_ORDERKEY} und auf \emph{O\_CLERK} (Kosten sinken von 6629 auf 336, vgl. Abschnitt \ref{no-idx-sel-partial-or} auf Seite \pageref{no-idx-sel-partial-or}). Für beide Bedingungen wird im Index der Eintrag mit dem entsprechenden Wert gesucht. Die gefundenen Einträge werden nun mit dem Operator OR verknüpft. Anschliessend wird mit der ermittelten ROWID ein Zugriff auf die Tabelle durchgeführt mit (\emph{TABLE ACCESS BY INDEX ROWID}), da die komplette Zeile und nicht nur der Index ausgegeben werden soll.
 \begin{lstlisting}
 --------------------------------------------------------------------------------------------------                                                                                                                                                                                                           
 | Id  | Operation                        | Name          | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                           
@@ -382,7 +382,7 @@ Predicate Information (identified by operation id):
 \end{lstlisting}
 
 \subsubsection{Partial Point, AND}
-
+Auch das Partial Point Query mit der AND Bedingung profitiert enorm vom  Index auf \emph{O\_ORDERKEY} (Kosten sinken von 6611 auf 4, vgl. Abschnitt \ref{no-idx-sel-partial-and} auf Seite \pageref{no-idx-sel-partial-and}). Im Gegensatz zum Query mit OR muss hier die zweite Bedingung nur dann überprüft werden, wenn die erste Bedingung zugrifft. Daher kann direkt nach dem ersten \emph{INDEX RANGE SCAN} der Zugriff auf die Tabelle gemacht werden und anschliessend muss nur noch gefiltert werden (der Index \emph{O\_CLERK} wird hier nicht verwendet) . Nur eine Zeile erfüllt die erste Bedingung, wodurch die Kosten so niedrig ausfallen.
 \begin{lstlisting}
 ---------------------------------------------------------------------------------------------                                                                                                                                                                                                                
 | Id  | Operation                   | Name          | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                                
@@ -400,7 +400,7 @@ Predicate Information (identified by operation id):
 \end{lstlisting}
 
 \subsubsection{Partial Point, AND mit Funktion}
-
+Auch das Partial Point Query mit der AND Bedingung und der Funktion profitiert vom  Index auf \emph{O\_CLERK} (Kosten sinken von 6615 auf 1464, vgl. Abschnitt \ref{no-idx-sel-partial-and-funktion} auf Seite \pageref{no-idx-sel-partial-and-funktion}). Im Gegesatz zum Query mit AND wird hier der Zugriff auf den Index \emph{O\_CLERK} gemacht und anschliessend gefiltert. Da 1500 Zeilen die Bedingung O\_CLERK='Clerk\#000000286' erfüllen sind die Kosten wesentlich höher als beim Partial Point mit AND.
 \begin{lstlisting}
 ------------------------------------------------------------------------------------------                                                                                                                                                                                                                   
 | Id  | Operation                   | Name       | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                                   
@@ -418,7 +418,7 @@ Predicate Information (identified by operation id):
 \end{lstlisting}
 
 \subsubsection{Range Query}
-Intervallgrösse??
+Das Range Query profitiert vom  Index auf \emph{O\_ORDERKEY} (Kosten sinken von 6603 auf 932, vgl. Abschnitt \ref{no-idx-sel-range} auf Seite \pageref{no-idx-sel-range}). Auch hier wird ein \emph{INDEX RANGe SCAN} durchgeführt und anschliessend für alle Treffer ein \emph{TABLE ACCESS BY INDEX ROWID} gemacht.\\ 
 \begin{lstlisting}
 ---------------------------------------------------------------------------------------------                                                                                                                                                                                                                
 | Id  | Operation                   | Name          | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                                
@@ -434,8 +434,24 @@ Predicate Information (identified by operation id):
    2 - access("O_ORDERKEY">=111111 AND "O_ORDERKEY"<=222222)                                                                                                                                                                                                                                                 
 \end{lstlisting}
 
+Die Intervallgrösse spielt hier eine Rolle, da mit dem Index nur bei den zutreffenden Zeilen ein Zugriff auf die Tabelle durchgeführt wird. Wenn das Intervall vergrössert wird und dadurch mehr Zeilen gefunden werden, werden automatisch mehr Zugriffe auf die Tabelle gemacht, was die Kosten erhöht.\\
+Wenn die Range genügend gross ist, wird der Index nicht mehr verwendet, sondern es wird direkt ein \emph{TABLE ACCESS FULL} gemacht, da mit dem INDEX kein besseres Ergebnis erzielt werden kann, wenn jede Zeile im Index ein treffer ist.
+\begin{lstlisting}
+----------------------------------------------------------------------------                                                                                                                                                                                                                                 
+| Id  | Operation         | Name   | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                                                 
+----------------------------------------------------------------------------                                                                                                                                                                                                                                 
+|   0 | SELECT STATEMENT  |        |   249K|    26M|  6605   (1)| 00:01:20 |                                                                                                                                                                                                                                 
+|*  1 |  TABLE ACCESS FULL| ORDERS |   249K|    26M|  6605   (1)| 00:01:20 |                                                                                                                                                                                                                                 
+----------------------------------------------------------------------------                                                                                                                                                                                                                                 
+                                                                                                                                                                                                                                                                                                             
+Predicate Information (identified by operation id):                                                                                                                                                                                                                                                          
+---------------------------------------------------                                                                                                                                                                                                                                                          
+                                                                                                                                                                                                                                                                                                             
+   1 - filter("O_ORDERKEY"<=999222 AND "O_ORDERKEY">=000111)                                                                                                                                                                                                                                                 
+\end{lstlisting}
 
 \subsubsection{Partial Range Query}
+Das Partial Range Query kann wiederum vom Index auf \emph{O\_ORDERKEY} und auf \emph{O\_CLERK} profitieren (Kosten sinken von 6611 auf 27, vgl. Abschnitt \ref{no-idx-sel-range-partial} auf Seite \pageref{no-idx-sel-range-partial}). Zuerst wird für jede Bedingung ein \emph{INDEX RANGE SCAN} durchgeführt, welche anschliessend mit der Bedingung AND verknüpft werden. Erst dann wird ein \emph{TABLE ACCESS BY INDEX ROWID} durchgeführt.
 \begin{lstlisting}
 --------------------------------------------------------------------------------------------------                                                                                                                                                                                                           
 | Id  | Operation                        | Name          | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                           
@@ -462,7 +478,7 @@ Predicate Information (identified by operation id):
 
 \subsection{Join}
 \subsubsection{Join}
-Normal:
+Das gegebene Query mit dem normalen Join führt zu Kosten von 17514. Trotz Index wird ein \emph{TABLE ACCESS FULL} gemacht. Dies aus dem Grund, dass keine Bedingung gesetzt ist und somit für jede Zeile ein Join gemacht wird. Die Kosten des \emph{HASH JOIN}  belaufen sich auf 9953.
 \begin{lstlisting}
 ----------------------------------------------------------------------------------------                                                                                                                                                                                                                     
 | Id  | Operation          | Name      | Rows  | Bytes |TempSpc| Cost (%CPU)| Time     |                                                                                                                                                                                                                     
@@ -479,13 +495,14 @@ Predicate Information (identified by operation id):
    1 - access("O_CUSTKEY"="C_CUSTKEY")                                                                                                                                                                                                                                                                       
 \end{lstlisting}
 
-Nested Loop Join:
-Hint:
+Mit einem Hint kann für das gleiche Query erzwungen werden, dass ein \emph{NESTED LOOP} verwendet werden soll. Das Query sieht nun wie folgt aus:
 \begin{lstlisting}
 SELECT /*+ USE_NL(customers orders) */* 
 FROM orders, customers
 WHERE o_custkey = c_custkey;
 \end{lstlisting}
+
+Die Kosten für das Query mit dem \emph{NESTED LOOP} sind wesentlich höher als mit dem \emph{HASH JOIN}. Die kompletten Kosten belaufen sich auf 991000000, wobei die beiden \emph{TABLE ACCESS FULL} beinahe gleich sind wie im normalen Join mit \emph{HASH JOIN}. Der \emph{NESTED LOOP} sollte hier auf keinen Fall verwendet werden.
 \begin{lstlisting}
 --------------------------------------------------------------------------------                                                                                                                                                                                                                             
 | Id  | Operation          | Name      | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                                             
@@ -502,13 +519,14 @@ Predicate Information (identified by operation id):
    3 - filter("O_CUSTKEY"="C_CUSTKEY")                                                                                                                                                                                                                                                                       
 \end{lstlisting}
 
-Merge Join:
-Hint:
+Ebenfalls mit einem Hint erzwingen wir den \emph{MERGE JOIN}. Das Query sieht wie folgt aus:
 \begin{lstlisting}
 SELECT /*+ USE_MERGE(customers orders) */* 
 FROM orders, customers
 WHERE o_custkey = c_custkey;
 \end{lstlisting}
+
+Die Kosten für das Query mit dem \emph{MERGE JOIN} sind klar tiefer als beim \emph{NESTED LOOP} aber immer noch ca. 3 mal grösser als beim \emph{HASH JOIN}. Sie belaufen sich auf 50568. Auch hier wird ein \emph{TABLE ACCESS FULL} gemacht, auf welchen jeweils ein \emph{SORT JOIN} ausgeführt wird. Der \emph{MERGE JOIN} wird anschliessend auf die beiden \emph{SORT JOIN} gemacht.
 \begin{lstlisting}
 -----------------------------------------------------------------------------------------                                                                                                                                                                                                                    
 | Id  | Operation           | Name      | Rows  | Bytes |TempSpc| Cost (%CPU)| Time     |                                                                                                                                                                                                                    
@@ -528,8 +546,10 @@ Predicate Information (identified by operation id):
        filter("O_CUSTKEY"="C_CUSTKEY")                                                                                                                                                                                                                                                                       
 \end{lstlisting}
 
+Fazit: Das Query mit dem \emph{HASH JOIN} erreicht die geringsten Kosten.
+
 \subsubsection{Join, AND}
-Normal:
+Das Query Join mit AND Bedingung kann den Index \emph{O\_ORDERKEY} verwenden und kann daher die Kosten auf 957 reduzieren. Die Anzahl Zeilen bei der Tabelle ORDERS wird von 1500000 auf 25 reduziert, dies dank der AND Bedingung. Bei der Tabelle CUSTOMERS wird immer noch ein \emph{TABLE ACCESS FULL} gemacht. Die Kosten des \emph{HASH JOIN} belaufen sich auf 2.
 \begin{lstlisting}
 ----------------------------------------------------------------------------------------------                                                                                                                                                                                                               
 | Id  | Operation                    | Name          | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                               
@@ -548,14 +568,15 @@ Predicate Information (identified by operation id):
    3 - access("O_ORDERKEY"<100)                                                                                                                                                                                                                                                                              
 \end{lstlisting}
 
-Nested Loop Join:
-Hint:
+Mit einem Hint kann für das gleiche Query erzwungen werden, dass ein \emph{NESTED LOOP} verwendet werden soll. Das Query sieht nun wie folgt aus:
 \begin{lstlisting}
 SELECT /*+ USE_NL(customers orders) */*
 FROM orders, customers
 WHERE o_custkey = c_custkey
 AND o_orderkey < 100;
 \end{lstlisting}
+
+Auch hier kann der Index \emph{O\_ORDERKEY} verwendet werden. Im Vergleich mit dem ersten Query ohne Bedingung sind die Kosten wesentlich kleiner (von 991000000 auf 23747). Verglichen mit dem \emph{HASH JOIN} mit Bedingung sind die Kosten aber immer noch viel zu hoch und sollte daher nicht verwendet werden.
 \begin{lstlisting}
 ----------------------------------------------------------------------------------------------                                                                                                                                                                                                               
 | Id  | Operation                    | Name          | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                               
@@ -574,14 +595,15 @@ Predicate Information (identified by operation id):
    4 - filter("O_CUSTKEY"="C_CUSTKEY")                                                                                                                                                                                                                                                                       
 \end{lstlisting}
 
-Merge Join:
-Hint:
+Ebenfalls mit einem Hint erzwingen wir den \emph{MERGE JOIN}. Das Query sieht wie folgt aus:
 \begin{lstlisting}
 SELECT /*+ USE_MERGE(customers orders) */*
 FROM orders, customers
 WHERE o_custkey = c_custkey
 AND o_orderkey < 100;
 \end{lstlisting}
+
+Der Merge Join kann ebenfalls vom Index \emph{O\_ORDERKEY} profitieren und bringt seine Kosten von 50568 ohne Bedingung auf 6207 mit AND Bedingung. Vergliche mit dem \emph{NESTED LOOP} sind die Kosten beinahe um den Faktor 4 kleiner. Andererseits sind die Kosten gegenüber dem \emph{HASH JOIN} um den Faktor 6 höher.
 \begin{lstlisting}
 -------------------------------------------------------------------------------------------------------                                                                                                                                                                                                      
 | Id  | Operation                     | Name          | Rows  | Bytes |TempSpc| Cost (%CPU)| Time     |                                                                                                                                                                                                      
@@ -603,6 +625,8 @@ Predicate Information (identified by operation id):
        filter("O_CUSTKEY"="C_CUSTKEY")                                                                                                                                                                                                                                                                       
 \end{lstlisting}
 
+Fazit: Das Query mit dem \emph{HASH JOIN} erreicht die geringsten Kosten.
+
 \subsubsection{Join, INDEX}
 Als erstes haben wir den neuen Index erstellt. (Ab Zeile 3 Output)
 \begin{lstlisting}
@@ -611,7 +635,7 @@ CREATE INDEX c_custkey_ix ON customers(c_custkey);
 index C_CUSTKEY_IX erstellt.
 \end{lstlisting}
 
-Normal:
+Das Query ergibt genau denselben Ausführungsplan wie mit nur einem Index. Obwohl für beide Tabellen Inices existieren, wird jeweils ein \emph{TABLE ACCESS FULL} durchgeführt.
 \begin{lstlisting}
 ----------------------------------------------------------------------------------------                                                                                                                                                                                                                     
 | Id  | Operation          | Name      | Rows  | Bytes |TempSpc| Cost (%CPU)| Time     |                                                                                                                                                                                                                     
@@ -628,13 +652,14 @@ Predicate Information (identified by operation id):
    1 - access("O_CUSTKEY"="C_CUSTKEY")                                                                                                                                                                                                                                                                       
 \end{lstlisting}
 
-Nested Loop Join:
-Hint:
+Mit einem Hint kann für das gleiche Query erzwungen werden, dass ein \emph{NESTED LOOP} verwendet werden soll. Das Query sieht nun wie folgt aus:
 \begin{lstlisting}
 SELECT /*+ USE_NL(customers orders) */*
 FROM orders, customers
 WHERE o_custkey = c_custkey;
 \end{lstlisting}
+
+!!!!----TODO----!!!: Das Query mit dem \emph{NESTED LOOP} kann vom zweiten Index profitieren.
 \begin{lstlisting}
 ---------------------------------------------------------------------------------------------                                                                                                                                                                                                                
 | Id  | Operation                    | Name         | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                                
@@ -653,13 +678,14 @@ Predicate Information (identified by operation id):
    4 - access("O_CUSTKEY"="C_CUSTKEY")                                                                                                                                                                                                                                                                       
 \end{lstlisting}
 
-Merge Join:
-Hint:
+Ebenfalls mit einem Hint erzwingen wir den \emph{MERGE JOIN}. Das Query sieht wie folgt aus:
 \begin{lstlisting}
 SELECT /*+ USE_MERGE(customers orders) */*
 FROM orders, customers
 WHERE o_custkey = c_custkey;
 \end{lstlisting}
+
+Auch diese Query ergibt genau denselben Ausführungsplan wie mit nur einem Index. Obwohl für beide Tabellen Inices existieren, wird jeweils ein \emph{TABLE ACCESS FULL} durchgeführt.
 \begin{lstlisting}
 -----------------------------------------------------------------------------------------                                                                                                                                                                                                                    
 | Id  | Operation           | Name      | Rows  | Bytes |TempSpc| Cost (%CPU)| Time     |                                                                                                                                                                                                                    
