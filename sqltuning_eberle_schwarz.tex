@@ -23,10 +23,6 @@
 \vfill
 \tableofcontents
 
-\section{Einleitung}
-
-
-
 \section{Statistiken}
 \subsection{Statistiken sammeln}
 Mit dem folgenden Befehl werden die Statistiken für alle Tabellen aufgebaut:
@@ -321,6 +317,7 @@ O_CLERK_IX                               48234496
 
 \subsection{Projektion}
 \subsubsection{DISTINCT o\_clerk FROM}
+\label{idx-pro-singlecol-distinct}
 Im Gegensatz zum Output ohne Index (siehe Abschnitt \ref{no-idx-pro-singlecol-distinct} auf Seite \pageref{no-idx-pro-singlecol-distinct}) fallen die Kosten bei der Abfrage mit Index merklich geringer aus. Der Schritt \emph{HASH UNIQUE} verursacht Kosten von 69, was gegenüber der Abfrage ohne Index keinen Unterschied darstellt. Allerdings ist der \emph{INDEX FAST FULL SCAN} viel günstiger als \emph{TABLE ACCESS FULL} (Kosten sinken von 6607 auf 1546).
 
 Wir erklären uns dies dadurch, dass die Daten für das Query (lediglich Spalte \emph{O\_CLERK}) in diesem Fall direkt aus dem Index gelesen werden während ohne Index für \emph{O\_CLERK} die gesamte Tabelle von der Disk gelesen werden muss. Da der Index ca. vier mal kleiner ist als die Tabelle fallen auch die Kosten ca. viermal kleiner aus.
@@ -359,7 +356,13 @@ Predicate Information (identified by operation id):
 Verwenden wir den Hint \emph{FULL(orders)} im Statement, erhalten wir den selben Ausführungsplan wie in Abschnitt \ref{no-idx-sel-exactpoint} auf Seite \pageref{no-idx-sel-exactpoint}. Dann wird der Zugriff auf die gesuchte Zeile nicht über den Index vorgenommen.
 
 \subsubsection{Partial Point, OR}
+\label{idx-sel-partial-or}
 Das Partial Point Query mit der OR Bedingung profitiert vom Index auf \emph{O\_ORDERKEY} und auf \emph{O\_CLERK} (Kosten sinken von 6629 auf 336, vgl. Abschnitt \ref{no-idx-sel-partial-or} auf Seite \pageref{no-idx-sel-partial-or}). Für beide Bedingungen wird im Index der Eintrag mit dem entsprechenden Wert gesucht. Die gefundenen Einträge werden nun mit dem Operator OR verknüpft. Anschliessend wird mit der ermittelten ROWID ein Zugriff auf die Tabelle durchgeführt mit (\emph{TABLE ACCESS BY INDEX ROWID}), da die komplette Zeile und nicht nur der Index ausgegeben werden soll.
+
+Informationen zu den \emph{BITMAP CONVERSION}s und \emph{BITMAP OR} haben wir unter \url{http://gerardnico.com/wiki/database/oracle/bitmap} gefunden. Ein Bitmap-Index (der in diesem Query temporär erzeugt wird) bietet sich an, falls die Spalte eine geringe Anzahl unterschiedlicher Werte aufweist oder wir uns nur für wenige Werte interessieren. Letzteres ist nach den Zugriffen auf die einzelnen Indices (Ids 5 und 7 im Ausführungsplan) der Fall.
+
+Für jede Zeile der Tabelle wird dabei in einem Bit gespeichert, ob der Wert in der gefragten Spalte (\emph{o\_orderkey} oder \emph{o\_clerk}) dem jeweiligen Kriterium entspricht. Diese beiden Bitsequenzen können danach  OR-verknüpft werden und man erhält eine Bitsequenz, die genau für jene RowIDs ein \emph{true} enthält, die danach im Resultat erscheinen sollen.
+
 \begin{lstlisting}
 --------------------------------------------------------------------------------------------------                                                                                                                                                                                                           
 | Id  | Operation                        | Name          | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                           
@@ -382,7 +385,7 @@ Predicate Information (identified by operation id):
 \end{lstlisting}
 
 \subsubsection{Partial Point, AND}
-Auch das Partial Point Query mit der AND Bedingung profitiert enorm vom  Index auf \emph{O\_ORDERKEY} (Kosten sinken von 6611 auf 4, vgl. Abschnitt \ref{no-idx-sel-partial-and} auf Seite \pageref{no-idx-sel-partial-and}). Im Gegensatz zum Query mit OR muss hier die zweite Bedingung nur dann überprüft werden, wenn die erste Bedingung zugrifft. Daher kann direkt nach dem ersten \emph{INDEX RANGE SCAN} der Zugriff auf die Tabelle gemacht werden und anschliessend muss nur noch gefiltert werden (der Index \emph{O\_CLERK} wird hier nicht verwendet) . Nur eine Zeile erfüllt die erste Bedingung, wodurch die Kosten so niedrig ausfallen.
+Auch das Partial Point Query mit der AND Bedingung profitiert enorm vom  Index auf \emph{O\_ORDERKEY} (Kosten sinken von 6611 auf 4, vgl. Abschnitt \ref{no-idx-sel-partial-and} auf Seite \pageref{no-idx-sel-partial-and}). Im Gegensatz zum Query mit OR muss hier die zweite Bedingung nur dann überprüft werden, wenn die erste Bedingung zugrifft. Daher kann direkt nach dem ersten \emph{INDEX RANGE SCAN} der Zugriff auf die Tabelle gemacht werden. Anschliessend muss nur noch gefiltert werden (der Index \emph{O\_CLERK} wird hier nicht verwendet). Nur eine Zeile erfüllt die erste Bedingung, wodurch die Kosten so niedrig ausfallen.
 \begin{lstlisting}
 ---------------------------------------------------------------------------------------------                                                                                                                                                                                                                
 | Id  | Operation                   | Name          | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                                
@@ -418,7 +421,8 @@ Predicate Information (identified by operation id):
 \end{lstlisting}
 
 \subsubsection{Range Query}
-Das Range Query profitiert vom  Index auf \emph{O\_ORDERKEY} (Kosten sinken von 6603 auf 932, vgl. Abschnitt \ref{no-idx-sel-range} auf Seite \pageref{no-idx-sel-range}). Auch hier wird ein \emph{INDEX RANGe SCAN} durchgeführt und anschliessend für alle Treffer ein \emph{TABLE ACCESS BY INDEX ROWID} gemacht.\\ 
+\label{idx-sel-range}
+Das Range Query profitiert vom  Index auf \emph{O\_ORDERKEY} (Kosten sinken von 6603 auf 932, vgl. Abschnitt \ref{no-idx-sel-range} auf Seite \pageref{no-idx-sel-range}). Auch hier wird ein \emph{INDEX RANGE SCAN} durchgeführt und anschliessend für alle Treffer ein \emph{TABLE ACCESS BY INDEX ROWID} gemacht.
 \begin{lstlisting}
 ---------------------------------------------------------------------------------------------                                                                                                                                                                                                                
 | Id  | Operation                   | Name          | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                                
@@ -452,6 +456,8 @@ Predicate Information (identified by operation id):
 
 \subsubsection{Partial Range Query}
 Das Partial Range Query kann wiederum vom Index auf \emph{O\_ORDERKEY} und auf \emph{O\_CLERK} profitieren (Kosten sinken von 6611 auf 27, vgl. Abschnitt \ref{no-idx-sel-range-partial} auf Seite \pageref{no-idx-sel-range-partial}). Zuerst wird für jede Bedingung ein \emph{INDEX RANGE SCAN} durchgeführt, welche anschliessend mit der Bedingung AND verknüpft werden. Erst dann wird ein \emph{TABLE ACCESS BY INDEX ROWID} durchgeführt.
+
+Informationen bzgl. \emph{BITMAP} haben wir bereits in Abschnitt \ref{idx-sel-partial-or} auf Seite \pageref{idx-sel-partial-or} angeführt.
 \begin{lstlisting}
 --------------------------------------------------------------------------------------------------                                                                                                                                                                                                           
 | Id  | Operation                        | Name          | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                           
@@ -635,7 +641,7 @@ CREATE INDEX c_custkey_ix ON customers(c_custkey);
 index C_CUSTKEY_IX erstellt.
 \end{lstlisting}
 
-Das Query ergibt genau denselben Ausführungsplan wie mit nur einem Index. Obwohl für beide Tabellen Inices existieren, wird jeweils ein \emph{TABLE ACCESS FULL} durchgeführt.
+Das Query ergibt genau denselben Ausführungsplan wie mit nur einem Index. Obwohl für beide Tabellen Indices existieren, wird jeweils ein \emph{TABLE ACCESS FULL} durchgeführt.
 \begin{lstlisting}
 ----------------------------------------------------------------------------------------                                                                                                                                                                                                                     
 | Id  | Operation          | Name      | Rows  | Bytes |TempSpc| Cost (%CPU)| Time     |                                                                                                                                                                                                                     
@@ -659,7 +665,7 @@ FROM orders, customers
 WHERE o_custkey = c_custkey;
 \end{lstlisting}
 
-Das Query mit dem \emph{NESTED LOOP} kann vom zweiten Index profitieren. Er für einen \emph{TABLE ACCESS FULL} auf die Tabelle ORDERS durch und greift anschliessend über den Index \emph{C\_CUSTKEY} auf die Tabelle CUSTOMERS zu. Die Kosten für den \emph{NESTED LOOP} liegt ca. bei 6000000. 
+Das Query mit dem \emph{NESTED LOOP} kann vom zweiten Index profitieren. Er für einen \emph{TABLE ACCESS FULL} auf die Tabelle ORDERS durch und greift anschliessend über den Index \emph{C\_CUSTKEY} auf die Tabelle CUSTOMERS zu. Die Kosten für den \emph{NESTED LOOP} liegen ca. bei 3000390.
 \begin{lstlisting}
 ---------------------------------------------------------------------------------------------                                                                                                                                                                                                                
 | Id  | Operation                    | Name         | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                                
@@ -685,7 +691,7 @@ FROM orders, customers
 WHERE o_custkey = c_custkey;
 \end{lstlisting}
 
-Auch diese Query ergibt genau denselben Ausführungsplan wie mit nur einem Index. Obwohl für beide Tabellen Inices existieren, wird jeweils ein \emph{TABLE ACCESS FULL} durchgeführt.
+Auch diese Query ergibt genau denselben Ausführungsplan wie mit nur einem Index. Obwohl für beide Tabellen Indices existieren, wird jeweils ein \emph{TABLE ACCESS FULL} durchgeführt.
 \begin{lstlisting}
 -----------------------------------------------------------------------------------------                                                                                                                                                                                                                    
 | Id  | Operation           | Name      | Rows  | Bytes |TempSpc| Cost (%CPU)| Time     |                                                                                                                                                                                                                    
@@ -706,7 +712,13 @@ Predicate Information (identified by operation id):
 \end{lstlisting}
 
 \section{Quiz}
-Ohne Optimierung werden von jeder Tabelle sämtliche Zeilen gelesen. Dies hat enorme Kosten zur Folge hat. Die Operation TABLE ACCESS FULL kostet auf der Tabelle LINEITEMS 29675, auf der Tabelle PARTS 1052 und auf der Tabelle PARTSUPPS 4525. Der erste HASH JOIN auf PARTSUPPS und PARTS kostet 295. Der zweite HASH JOIN auf LINEITEMS und den ersten HASH JOIN kostet 30. Der HASH JOIN ist sehr CPU intensiv. Ebenfalls ist erkennbar, dass die Abfrage durch die grosse Datenmenge relativ lange dauert. Da es sich um ein COUNT handelt, wird die Anzahl Zeilen am Ende auf 1 reduziert.
+Ohne Optimierung werden von jeder Tabelle sämtliche Zeilen gelesen. Dies hat enorme Kosten zur Folge.
+
+Die Operation TABLE ACCESS FULL kostet auf der Tabelle LINEITEMS 29675, auf der Tabelle PARTS 1052 und auf der Tabelle PARTSUPPS 4525.
+
+Der erste HASH JOIN auf PARTSUPPS und PARTS kostet 295. Der zweite HASH JOIN auf LINEITEMS und den ersten HASH JOIN kostet 30. Der HASH JOIN ist sehr CPU intensiv.
+
+Ebenfalls ist erkennbar, dass die Abfrage durch die grosse Datenmenge relativ lange dauert. Da es sich um ein COUNT handelt, wird die Anzahl Zeilen am Ende auf 1 reduziert.
 \begin{lstlisting}
 ----------------------------------------------------------------------------------                                                                                                                                                                                                                           
 | Id  | Operation            | Name      | Rows  | Bytes | Cost (%CPU)| Time     |                                                                                                                                                                                                                           
@@ -732,7 +744,7 @@ Predicate Information (identified by operation id):
               BRUSHED COPPER')                                                                                                                                                                                                                                                                               
 \end{lstlisting}
 
-Um die Abfrage zu optimieren, haben wir folgende Indices erstellt. (Ab Zeile 6 Output):
+Um die Abfrage zu optimieren, haben wir folgende Indices erstellt (ab Zeile 6 Output):
 \begin{lstlisting}
 CREATE INDEX p_partkey_ix ON parts (p_partkey) ;
 CREATE INDEX ps_partkey_ix ON partsupps (ps_partkey) ;
@@ -751,7 +763,12 @@ CREATE INDEX ps_suppkey_ix ON partsupps (ps_suppkey) ;
 CREATE INDEX p_type_ix ON parts (p_type) ;
 \end{lstlisting}
 
-Nach dem Erstellen der Indices sind die Kosten enorm gesunken, von vorher 35577 auf neu 52. Durch die erstellten Indices werden keine TABLE ACCESS FULL Operationen mehr ausgeführt, sondern INDEX RANGE SCAN Operationen, welche nur minime Kosten verursachen. Anstelle des HASH JOIN wird neu NESTED LOOPS verwendet. \\
+Nach dem Erstellen der Indices sind die Kosten enorm gesunken, von vorher 35577 auf neu 52.
+
+Durch die erstellten Indices werden keine TABLE ACCESS FULL Operationen mehr ausgeführt, sondern INDEX RANGE SCAN Operationen, welche nur minime Kosten verursachen.
+
+Anstelle des HASH JOIN werden neu NESTED LOOPS verwendet.
+
 Weiter haben wir mithilfe verschiedener Hints versucht die Kosten zu senken (\emph{LEADING(...)}, \emph{USE\_HASH(...)}, \emph{USE\_MERGE(...)}, ...) jedoch verwendet Oracle hier automatisch den NESTED LOOP welcher in diesem Fall sehr effizient ist. 
 \begin{lstlisting}
 ---------------------------------------------------------------------------------------------------                                                                                                                                                                                                          
@@ -787,13 +804,13 @@ Predicate Information (identified by operation id):
 
 \section{Deep Left Join?}
 
-Beim Bushy Tree geht es darum, die Nodes gleichmässig zu verteilen. Eine gute Visualisierung, sowie ein Vergleich des Left Deep, Right Deep und Bushy Join ist unter \url{http://www.oaktable.net/content/right-deep-left-deep-and-bushy-joins} ersichtlich.\\
-\\
+Beim Bushy Tree geht es darum, die Nodes gleichmässig zu verteilen. Eine gute Visualisierung, sowie ein Vergleich des Left Deep, Right Deep und Bushy Join ist unter \url{http://www.oaktable.net/content/right-deep-left-deep-and-bushy-joins} ersichtlich.
+
 Wir haben versucht einen Bushy Tree zu bilden, indem wir ausschliesslich Hints verwenden. Dies ist jedoch nicht möglich.
+
 Bei unseren Recherchen sind wir auf den Link \url{https://sites.google.com/site/embtdbo/Home/sql-hint-documentation} gestossen, in welchem beschrieben ist, dass ein Bushy Tree zwingend Subselects benötigt. Wir zitieren:
 \begin{quote}
-What Jonathan means by BUSHY is that Oracle does not execute the join of 2 or more tables and  then join that result to 2 other tables (or more) to achieve that affect you have that with Common Table Expressions (CTE) known as Subquery Factoring in Oracle (ie the 'with' clause)
-Oracle only joins one table table at a time to the current result set. In order to make Oracle join the results sets from table A and B to the result set from tables C and D, you have to use subqueries and the NO\_MERGE hint.
+What Jonathan means by BUSHY is that Oracle does not execute the join of 2 or more tables and  then join that result to 2 other tables (or more) to achieve that affect you have that with Common Table Expressions (CTE) known as Subquery Factoring in Oracle (ie the 'with' clause) Oracle only joins one table table at a time to the current result set. In order to make Oracle join the results sets from table A and B to the result set from tables C and D, you have to use subqueries and the NO\_MERGE hint.
 \end{quote}
 
 Mithilfe den Subselects und den Hints \emph{NO\_MERGE} haben wir folgendes Query erstellt, welches einen Bushy Tree generiert:
@@ -964,5 +981,11 @@ Predicate Information (identified by operation id):
 \end{lstlisting}
 
 \section{Reflexion}
+In erster Linie waren wir von den enormen Kostenunterschieden überrascht, die durch die Verwendung von Indices resp. den Verzicht darauf ausgelöst werden. Dass der Kostenunterschied und damit einhergehend die Ausführungszeit der Anfragen in derartigem Ausmass gesenkt werden kann, hätten wir uns nicht gedacht.
 
+Interessant ist ebenfalls, dass der Optimizer keinesfalls immer Zugriffe über Indices verwendet sobald diese vorhanden wären. Bei Queries ohne Selektion oder mit grossen Intervallen bei Range-Searches verwendet Oracle trotz vorhandenen Indices volle Tabellenzugriffe (vgl. Abschnitt \ref{idx-sel-range} auf Seite \pageref{idx-sel-range}), da dadurch grössere Blöcke am Stück von der Disk gelesen werden können und die hohen Kosten für IO einigermassen in Zaum gehalten werden. Eine Ausnahme diesbezüglich stellt das Query im Abschnitt \ref{idx-pro-singlecol-distinct} auf Seite \pageref{idx-pro-singlecol-distinct} dar, da in diesem fall die angefragten Daten komplett im Index gespeichert sind.
+
+Indices belegen zwar zusätzlichen Speicherplatz, aber bei den heutigen Preisen für Arbeitsspeicher und Festplatten überwiegen die Geschwindigkeitsvorteile gegenüber dem Verzicht auf Indices klar. Da die Festplatten (und auch die darauf gespeicherten Datenbanken) immer grösser werden, aber die Geschwindigkeit nicht im selben Ausmass zunimmt wie die Speicherdichte (von Solid-State-Drives einmal abgesehen), wird sich dieser Effekt in Zukunft noch verstärken.
+
+Indices müssten gemäss unserem Verständnis beim Einfügen und Aktualisieren von Datensätzen gewisse Kosten verursachen. Wir haben versucht dies mittels erneutem Befüllen der Orders-Tabelle (einmal mit und einmal ohne Indices) nachzuvollziehen, allerdings zeigen die Ausführungspläne dabei auch bzgl. Kosten keine Unterschiede.
 \end{document}
