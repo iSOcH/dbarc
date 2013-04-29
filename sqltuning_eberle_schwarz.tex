@@ -806,7 +806,7 @@ Predicate Information (identified by operation id):
 
 Beim Bushy Tree geht es darum, die Nodes gleichmässig zu verteilen. Eine gute Visualisierung, sowie ein Vergleich des Left Deep, Right Deep und Bushy Join ist unter \url{http://www.oaktable.net/content/right-deep-left-deep-and-bushy-joins} ersichtlich.
 
-Wir haben versucht einen Bushy Tree zu bilden, indem wir ausschliesslich Hints verwenden. Dies ist jedoch nicht möglich.
+Wir haben versucht einen Bushy Tree zu bilden, indem wir ausschliesslich Hints verwenden (\emph{LEADING(...)}, \emph{USE\_HASH(...)}, \emph{NO\_MERGE}, ...). Dies ist jedoch nicht möglich.
 
 Bei unseren Recherchen sind wir auf den Link \url{https://sites.google.com/site/embtdbo/Home/sql-hint-documentation} gestossen, in welchem beschrieben ist, dass ein Bushy Tree zwingend Subselects benötigt. Wir zitieren:
 \begin{quote}
