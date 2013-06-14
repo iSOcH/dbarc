@@ -1,0 +1,92 @@
+\documentclass[11pt,a4paper,parskip=half]{scrartcl}
+\usepackage{ngerman}
+\usepackage[utf8]{inputenc}
+\usepackage[colorlinks=false,pdfborder={0 0 0}]{hyperref}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{longtable}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{textcomp}
+\usepackage{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{nameref}
+\geometry{a4paper, left=30mm, right=25mm, top=30mm, bottom=35mm} 
+\usepackage{listings}
+\lstset{breaklines=true, breakatwhitespace=true, basicstyle=\tiny, numbers=left}
+\setcounter{tocdepth}{2} %no subsubsections in TOC
+
+\title{dbarc: Ausarbeitung Sicherheit und Zugriffssteuerung}
+\author{Yanick Eberle, Pascal Schwarz}
+\begin{document}
+\maketitle
+\vfill
+\tableofcontents
+
+\pagestyle{fancy}
+\section{Vorbereitung}
+\subsection{User erstellen}
+Als User \emph{system} führen wir folgende SQL Statements auf der Datenbank aus:
+
+\begin{lstlisting}
+blubb
+\end{lstlisting}
+\subsection{Rechte verteilen}
+
+
+\section{Zugriffssteuerung mit User und Rollen}
+\subsection{Tabellen erzeugen}
+\subsubsection{Vergleich Möglichkeiten MySql}
+\subsubsection{Vergleich Möglichkeiten MS-SQL}
+
+\subsection{View erstellen}
+\subsubsection{Vergleich Möglichkeiten MySql}
+\subsubsection{Vergleich Möglichkeiten MS-SQL}
+
+\subsection{Rollen definieren}
+\subsubsection{Vergleich Möglichkeiten MySql}
+\subsubsection{Vergleich Möglichkeiten MS-SQL}
+
+\subsection{Den Rollen Rechte zuweisen}
+\subsubsection{Vergleich Möglichkeiten MySql}
+\subsubsection{Vergleich Möglichkeiten MS-SQL}
+
+\subsection{Den User Rollen zuweisen}
+\subsubsection{Vergleich Möglichkeiten MySql}
+\subsubsection{Vergleich Möglichkeiten MS-SQL}
+
+\subsection{Überprüfen Sie die beiden Rollen}
+\subsubsection{Vergleich Möglichkeiten MySql}
+\subsubsection{Vergleich Möglichkeiten MS-SQL}
+
+\section{Zugriffsrechte: Objekt- und Systemrechte}
+
+\subsection{Objektrechte}
+\subsubsection{Vergleich Möglichkeiten MySql}
+\subsubsection{Vergleich Möglichkeiten MS-SQL}
+
+\subsection{Systemrechte}
+\subsubsection{Vergleich Möglichkeiten MySql}
+\subsubsection{Vergleich Möglichkeiten MS-SQL}
+
+\section{Views}
+\subsection{Rechte auf Views}
+\subsubsection{Vergleich Möglichkeiten MySql}
+\subsubsection{Vergleich Möglichkeiten MS-SQL}
+
+\subsection{DDL-Änderungen an den Basistabellen}
+\subsubsection{Vergleich Möglichkeiten MySql}
+\subsubsection{Vergleich Möglichkeiten MS-SQL}
+
+\subsection{Updatable Views}
+\subsubsection{Vergleich Möglichkeiten MySql}
+\subsubsection{Vergleich Möglichkeiten MS-SQL}
+
+\subsection{WITH CHECK OPTION}
+\subsubsection{Vergleich Möglichkeiten MySql}
+\subsubsection{Vergleich Möglichkeiten MS-SQL}
+
+\section{Reflexion}
+
+\end{document}
