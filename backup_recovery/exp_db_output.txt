@@ -1,0 +1,1312 @@
+oracle_stud@hades:/app/oracle_stud/oradata/dbarc02/export> exp system/manager file=${ORACLE_SID}_full full=y log=${ORACLE_SID}_full
+
+Export: Release 11.2.0.1.0 - Production on Fri Jun 21 08:25:03 2013
+
+Copyright (c) 1982, 2009, Oracle and/or its affiliates.  All rights reserved.
+
+
+Connected to: Oracle Database 11g Enterprise Edition Release 11.2.0.1.0 - 64bit Production
+With the Partitioning, OLAP, Data Mining and Real Application Testing options
+Export done in US7ASCII character set and AL16UTF16 NCHAR character set
+server uses AL32UTF8 character set (possible charset conversion)
+
+About to export the entire database ...
+. exporting tablespace definitions
+. exporting profiles
+. exporting user definitions
+. exporting roles
+. exporting resource costs
+. exporting rollback segment definitions
+. exporting database links
+. exporting sequence numbers
+. exporting directory aliases
+. exporting context namespaces
+. exporting foreign function library names
+. exporting PUBLIC type synonyms
+. exporting private type synonyms
+. exporting object type definitions
+. exporting system procedural objects and actions
+. exporting pre-schema procedural objects and actions
+. exporting cluster definitions
+. about to export SYSTEM's tables via Conventional Path ...
+. . exporting table                    DEF$_AQCALL          0 rows exported
+. . exporting table                   DEF$_AQERROR          0 rows exported
+. . exporting table                  DEF$_CALLDEST          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table               DEF$_DEFAULTDEST          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table               DEF$_DESTINATION          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                     DEF$_ERROR          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                       DEF$_LOB          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                    DEF$_ORIGIN          0 rows exported
+EXP-00091: Exporting questionable statistics.
+. . exporting table                DEF$_PROPAGATOR          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table       DEF$_PUSHED_TRANSACTIONS          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                            OL$
+. . exporting table                       OL$HINTS
+. . exporting table                       OL$NODES
+. . exporting table        REPCAT$_AUDIT_ATTRIBUTE          2 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table           REPCAT$_AUDIT_COLUMN          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table           REPCAT$_COLUMN_GROUP          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table               REPCAT$_CONFLICT          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                    REPCAT$_DDL          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table             REPCAT$_EXCEPTIONS          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table              REPCAT$_EXTENSION          0 rows exported
+EXP-00091: Exporting questionable statistics.
+. . exporting table                REPCAT$_FLAVORS          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table         REPCAT$_FLAVOR_OBJECTS          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table              REPCAT$_GENERATED          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table         REPCAT$_GROUPED_COLUMN          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table      REPCAT$_INSTANTIATION_DDL          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table            REPCAT$_KEY_COLUMNS          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table           REPCAT$_OBJECT_PARMS          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table           REPCAT$_OBJECT_TYPES         28 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table       REPCAT$_PARAMETER_COLUMN          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table               REPCAT$_PRIORITY          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table         REPCAT$_PRIORITY_GROUP          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table      REPCAT$_REFRESH_TEMPLATES          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                 REPCAT$_REPCAT          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table              REPCAT$_REPCATLOG          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table              REPCAT$_REPCOLUMN          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table         REPCAT$_REPGROUP_PRIVS          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table              REPCAT$_REPOBJECT          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                REPCAT$_REPPROP          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table              REPCAT$_REPSCHEMA          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table             REPCAT$_RESOLUTION          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table      REPCAT$_RESOLUTION_METHOD         19 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table  REPCAT$_RESOLUTION_STATISTICS          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table    REPCAT$_RESOL_STATS_CONTROL          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table          REPCAT$_RUNTIME_PARMS          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table              REPCAT$_SITES_NEW          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table           REPCAT$_SITE_OBJECTS          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table              REPCAT$_SNAPGROUP          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table       REPCAT$_TEMPLATE_OBJECTS          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table         REPCAT$_TEMPLATE_PARMS          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table     REPCAT$_TEMPLATE_REFGROUPS          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table         REPCAT$_TEMPLATE_SITES          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table        REPCAT$_TEMPLATE_STATUS          3 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table       REPCAT$_TEMPLATE_TARGETS          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table         REPCAT$_TEMPLATE_TYPES          2 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table    REPCAT$_USER_AUTHORIZATIONS          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table       REPCAT$_USER_PARM_VALUES          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. about to export OUTLN's tables via Conventional Path ...
+. . exporting table                            OL$          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                       OL$HINTS          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                       OL$NODES          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. about to export SCOTT's tables via Conventional Path ...
+. . exporting table                           DEPT          4 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                            EMP         14 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                       SALGRADE          5 rows exported
+EXP-00091: Exporting questionable statistics.
+. about to export SYSMAN's tables via Conventional Path ...
+. . exporting table       AQ$_MGMT_LOADER_QTABLE_G          0 rows exported
+. . exporting table       AQ$_MGMT_LOADER_QTABLE_H          0 rows exported
+EXP-00091: Exporting questionable statistics.
+. . exporting table       AQ$_MGMT_LOADER_QTABLE_I          0 rows exported
+EXP-00091: Exporting questionable statistics.
+. . exporting table       AQ$_MGMT_LOADER_QTABLE_L          0 rows exported
+EXP-00091: Exporting questionable statistics.
+. . exporting table       AQ$_MGMT_LOADER_QTABLE_S          2 rows exported
+EXP-00091: Exporting questionable statistics.
+. . exporting table       AQ$_MGMT_LOADER_QTABLE_T          0 rows exported
+EXP-00091: Exporting questionable statistics.
+. . exporting table       AQ$_MGMT_NOTIFY_QTABLE_G          0 rows exported
+. . exporting table       AQ$_MGMT_NOTIFY_QTABLE_H          0 rows exported
+EXP-00091: Exporting questionable statistics.
+. . exporting table       AQ$_MGMT_NOTIFY_QTABLE_I          0 rows exported
+EXP-00091: Exporting questionable statistics.
+. . exporting table       AQ$_MGMT_NOTIFY_QTABLE_L          0 rows exported
+EXP-00091: Exporting questionable statistics.
+. . exporting table       AQ$_MGMT_NOTIFY_QTABLE_S          2 rows exported
+EXP-00091: Exporting questionable statistics.
+. . exporting table       AQ$_MGMT_NOTIFY_QTABLE_T          0 rows exported
+EXP-00091: Exporting questionable statistics.
+. . exporting table              EMDW_TRACE_CONFIG          9 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table     EM_PAGE_CONDITION_METADATA          7 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table          EM_PAGE_CUST_METADATA          4 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                 ESM_COLLECTION        140 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table           EUME2E_ASSOCS_LOOKUP          9 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table            MGMT_ADMIN_LICENSES         19 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table            MGMT_AGENT_SEC_INFO          1 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table          MGMT_ALL_TARGET_PROPS          5 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table    MGMT_ARU_FAMILY_PRODUCT_MAP       1660 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table             MGMT_ARU_LANGUAGES         40 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table        MGMT_ARU_OUI_COMPONENTS        393 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table             MGMT_ARU_PLATFORMS         76 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table              MGMT_ARU_PRODUCTS        744 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table   MGMT_ARU_PRODUCT_RELEASE_MAP       5956 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table              MGMT_ARU_RELEASES        863 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table         MGMT_AUDIT_DESTINATION          1 rows exported
+EXP-00091: Exporting questionable statistics.
+. . exporting table              MGMT_AUDIT_MASTER          1 rows exported
+EXP-00091: Exporting questionable statistics.
+. . exporting table              MGMT_AVAILABILITY         17 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table       MGMT_AVAILABILITY_MARKER          5 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table        MGMT_AVAILABLE_SEARCHES         15 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table       MGMT_BAM_OSESSION_ALERTS          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table      MGMT_BAM_OSESSION_METRICS          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table       MGMT_BAM_OSESSION_STATUS          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table    MGMT_BLACKOUT_PROXY_TARGETS          5 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table           MGMT_BLACKOUT_REASON         60 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table         MGMT_BLACKOUT_SCHEDULE          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table          MGMT_BLACKOUT_WINDOWS          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table              MGMT_BSLN_METRICS          6 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table              MGMT_BSLN_RAWDATA          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                 MGMT_CALLBACKS         87 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                MGMT_CATEGORIES         12 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table          MGMT_CATEGORY_CLASSES          2 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table              MGMT_CATEGORY_MAP        637 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table               MGMT_COLLECTIONS        220 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table    MGMT_COLLECTION_CREDENTIALS          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table   MGMT_COLLECTION_METRIC_TASKS        208 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table          MGMT_COLLECTION_TASKS         28 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table   MGMT_COLLECTION_TASK_CONTEXT          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table MGMT_COLLECTION_TEMPLATE_CREDS          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table        MGMT_COLLECTION_WORKERS          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                MGMT_COLL_ITEMS        264 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table         MGMT_COLL_ITEM_METRICS        238 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table      MGMT_COLL_ITEM_PROPERTIES         48 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table         MGMT_CORRECTIVE_ACTION          2 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table             MGMT_CREATED_USERS          4 rows exported
+EXP-00091: Exporting questionable statistics.
+. . exporting table              MGMT_CREDENTIALS2          3 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table           MGMT_CREDENTIAL_SETS         35 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table    MGMT_CREDENTIAL_SET_COLUMNS         86 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table   MGMT_CREDENTIAL_SET_COL_VALS          8 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table          MGMT_CREDENTIAL_TYPES         19 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table   MGMT_CREDENTIAL_TYPE_COLUMNS         45 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table  MGMT_CREDENTIAL_TYPE_COL_VALS          3 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table       MGMT_CREDENTIAL_TYPE_REF          9 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table        MGMT_CS_CONFIG_STANDARD          3 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table              MGMT_CS_HIERARCHY        117 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                MGMT_CS_KEYWORD          3 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                   MGMT_CS_RULE         94 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table             MGMT_CS_RULEFOLDER         23 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table      MGMT_CURRENT_AVAILABILITY          5 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table           MGMT_CURRENT_METRICS        471 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table     MGMT_CURRENT_METRIC_ERRORS          3 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table         MGMT_CURRENT_VIOLATION         50 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table       MGMT_DB_CONTROLFILES_ECM          6 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table          MGMT_DB_DATAFILES_ECM         10 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table    MGMT_DB_DBNINSTANCEINFO_ECM          2 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table           MGMT_DB_FEATUREUSAGE        152 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table      MGMT_DB_HDM_METRIC_HELPER          1 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table        MGMT_DB_INIT_PARAMS_ECM        686 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table    MGMT_DB_LATEST_HDM_FINDINGS          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table            MGMT_DB_LICENSE_ECM          2 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table            MGMT_DB_OPTIONS_ECM         22 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table      MGMT_DB_RECTSSETTINGS_ECM          4 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table    MGMT_DB_RECUSERSETTINGS_ECM          2 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table           MGMT_DB_REDOLOGS_ECM          6 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table      MGMT_DB_ROLLBACK_SEGS_ECM          2 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                MGMT_DB_SGA_ECM         18 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table        MGMT_DB_TABLESPACES_ECM         10 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table      MGMT_DELTA_COMP_SUMMARIES          0 rows exported
+. . exporting table      MGMT_DELTA_SUMMARY_ERRORS          0 rows exported
+. . exporting table               MGMT_DELTA_ENTRY         19 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table        MGMT_DELTA_ENTRY_VALUES         19 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                 MGMT_DELTA_IDS          4 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table           MGMT_DELTA_ID_VALUES          6 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                MGMT_DELTA_SNAP         39 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table       MGMT_DEPLOYMENT_SECTIONS          1 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table      MGMT_DIROBJ_USERS_HOTLIST          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                MGMT_DM_ALITEMS         48 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table              MGMT_DM_RULEENTRY         45 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table          MGMT_DM_RULETEMPLATES         19 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table               MGMT_ECM_ARU_MAP         29 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table        MGMT_ECM_CSA_OUT_OF_BOX          1 rows exported
+EXP-00091: Exporting questionable statistics.
+. . exporting table          MGMT_ECM_GEN_SNAPSHOT         14 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table   MGMT_ECM_HOST_CONFIGS_TO_DEL          0 rows exported
+EXP-00091: Exporting questionable statistics.
+. . exporting table    MGMT_ECM_MD_ALL_TBL_COLUMNS        702 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table          MGMT_ECM_MD_HIST_TBLS         39 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table             MGMT_ECM_RESOURCES         14 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table              MGMT_ECM_SNAPSHOT          1 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table   MGMT_ECM_SNAPSHOT_MD_COLUMNS        837 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table    MGMT_ECM_SNAPSHOT_MD_TABLES        122 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table     MGMT_ECM_SNAPSHOT_METADATA         53 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table   MGMT_ECM_SNAP_COMPONENT_INFO          4 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                  MGMT_EMD_PING          1 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table            MGMT_EMD_PING_CHECK          1 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table    MGMT_ENTERPRISE_CREDENTIALS          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table              MGMT_ERROR_MASTER         12 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                MGMT_ESA_REPORT       2210 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table        MGMT_FAILOVER_CALLBACKS          4 rows exported
+EXP-00091: Exporting questionable statistics.
+. . exporting table            MGMT_FAILOVER_TABLE          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table        MGMT_FBP_PATCHING_GUIDS          3 rows exported
+EXP-00091: Exporting questionable statistics.
+. . exporting table          MGMT_FLAT_ROLE_GRANTS          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table         MGMT_FLAT_TARGET_ASSOC          3 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table       MGMT_GROUP_DEFAULT_CHART          9 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table               MGMT_HA_INFO_ECM          2 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                   MGMT_HA_MTTR          1 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table        MGMT_HA_RMAN_CONFIG_ECM          2 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table            MGMT_HC_CPU_DETAILS          2 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table       MGMT_HC_FS_MOUNT_DETAILS          6 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table        MGMT_HC_HARDWARE_MASTER          1 rows exported
+EXP-00091: Exporting questionable statistics.
+. . exporting table         MGMT_HC_IOCARD_DETAILS         22 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table            MGMT_HC_NIC_DETAILS          3 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table          MGMT_HC_OS_COMPONENTS       1027 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table          MGMT_HC_OS_PROPERTIES        331 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table             MGMT_HC_OS_SUMMARY          1 rows exported
+EXP-00091: Exporting questionable statistics.
+. . exporting table         MGMT_HC_SYSTEM_SUMMARY          1 rows exported
+EXP-00091: Exporting questionable statistics.
+. . exporting table   MGMT_HC_VENDOR_SW_COMPONENTS       1027 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table      MGMT_HC_VENDOR_SW_SUMMARY       1027 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table          MGMT_HOST_CREDENTIALS          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table    MGMT_HTTP_SESSION_CALLBACKS          1 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table             MGMT_INV_COMPONENT        394 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table             MGMT_INV_CONTAINER          4 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table    MGMT_INV_CONTAINER_PROPERTY          9 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table       MGMT_INV_DEPENDENCY_RULE        717 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table               MGMT_INV_SUMMARY          6 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table    MGMT_IP_ELEM_DEFAULT_PARAMS        130 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table     MGMT_IP_ELEM_PARAM_CLASSES        116 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table      MGMT_IP_ELEM_TARGET_TYPES         86 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table             MGMT_IP_REPORT_DEF        124 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table    MGMT_IP_REPORT_DEF_ELEMENTS        349 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table   MGMT_IP_REPORT_DEF_JIT_TYPES        135 rows exported
+EXP-00091: Exporting questionable statistics.
+. . exporting table        MGMT_IP_REPORT_ELEM_DEF         77 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table     MGMT_IP_REPORT_ELEM_PARAMS       2167 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table         MGMT_IP_SQL_STATEMENTS         31 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                       MGMT_JOB          5 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table             MGMT_JOB_CALLBACKS          6 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table               MGMT_JOB_COMMAND        146 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table   MGMT_JOB_COMMAND_BLOCK_PROCS          3 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table           MGMT_JOB_CREDENTIALS          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table           MGMT_JOB_CRED_PARAMS        101 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table   MGMT_JOB_DISPLAY_ERROR_CODES          8 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table      MGMT_JOB_EMD_STATUS_QUEUE          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                 MGMT_JOB_EVENT          1 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table              MGMT_JOB_EXECPLAN       1849 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table             MGMT_JOB_EXECUTION         12 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table            MGMT_JOB_EXEC_LOCKS          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table          MGMT_JOB_EXEC_SUMMARY         20 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table           MGMT_JOB_EXT_TARGETS          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table               MGMT_JOB_HISTORY         54 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table          MGMT_JOB_LARGE_PARAMS          2 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table             MGMT_JOB_LOCK_INFO          6 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table          MGMT_JOB_LOCK_TARGETS          6 rows exported
+EXP-00091: Exporting questionable statistics.
+. . exporting table                MGMT_JOB_OUTPUT         14 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table             MGMT_JOB_PARAMETER         11 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table          MGMT_JOB_PARAM_SOURCE        652 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table           MGMT_JOB_PROP_PARAMS         25 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table        MGMT_JOB_PURGE_CRITERIA          3 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table        MGMT_JOB_PURGE_POLICIES          4 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table          MGMT_JOB_PURGE_VALUES          3 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table              MGMT_JOB_SCHEDULE          3 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table              MGMT_JOB_SEC_INFO         12 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table   MGMT_JOB_SINGLE_TARGET_TYPES        137 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table            MGMT_JOB_SQL_PARAMS         10 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table         MGMT_JOB_STATE_CHANGES         65 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table           MGMT_JOB_STEP_PARAMS       5277 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table          MGMT_JOB_SUBST_PARAMS         24 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                MGMT_JOB_TARGET          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table     MGMT_JOB_TYPE_DISPLAY_INFO         87 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table             MGMT_JOB_TYPE_INFO        187 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table     MGMT_JOB_TYPE_MAX_VERSIONS        180 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table MGMT_JOB_TYPE_PARAM_DSPLY_INFO        300 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table   MGMT_JOB_TYPE_PARAM_URI_INFO          7 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table         MGMT_JOB_TYPE_URI_INFO         99 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table           MGMT_JOB_USER_PARAMS         15 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table          MGMT_JOB_VALUE_PARAMS        180 rows exported
+. . exporting table               PARAM_VALUES_TAB        308 rows exported
+. . exporting table    MGMT_LAST_SYNC_LOAD_DETAILS          1 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table            MGMT_LAST_VIOLATION        689 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table   MGMT_LICENSABLE_TARGET_TYPES         49 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table          MGMT_LICENSED_TARGETS         10 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table      MGMT_LICENSE_CONFIRMATION          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table       MGMT_LICENSE_DEFINITIONS         59 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table        MGMT_LOADER_DESIGNATORS         40 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table             MGMT_LOADER_QTABLE          0 rows exported
+. . exporting table          MGMT_LOGIN_ASSISTANTS          2 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                 MGMT_LONG_TEXT         31 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table   MGMT_MASTER_CHANGED_CALLBACK          1 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                  MGMT_MESSAGES      23311 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table             MGMT_METADATA_SETS         76 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                   MGMT_METRICS      12637 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table              MGMT_METRICS_1DAY       8807 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table             MGMT_METRICS_1HOUR      42964 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table    MGMT_METRICS_COMPOSITE_KEYS        100 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table               MGMT_METRICS_EXT         20 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table               MGMT_METRICS_RAW      43262 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table     MGMT_METRIC_DEPENDENCY_DEF         16 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table             MGMT_METRIC_ERRORS          3 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table           MGMT_METRIC_VERSIONS        273 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table       MGMT_MP_HOMEPAGE_REPORTS         30 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table        MGMT_NESTED_JOB_TARGETS        126 rows exported
+EXP-00091: Exporting questionable statistics.
+. . exporting table            MGMT_NOTIFY_DEVICES          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table    MGMT_NOTIFY_FORMAT_HANDLERS          6 rows exported
+EXP-00091: Exporting questionable statistics.
+. . exporting table       MGMT_NOTIFY_INPUT_QTABLE          0 rows exported
+. . exporting table   MGMT_NOTIFY_JOB_RULE_CONFIGS          1 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table          MGMT_NOTIFY_NOTIFYEES          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table           MGMT_NOTIFY_PROFILES          3 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table             MGMT_NOTIFY_QTABLE          0 rows exported
+. . exporting table             MGMT_NOTIFY_QUEUES         27 rows exported
+EXP-00091: Exporting questionable statistics.
+. . exporting table              MGMT_NOTIFY_RULES          7 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table       MGMT_NOTIFY_RULE_CONFIGS         41 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table            MGMT_OMS_PARAMETERS         17 rows exported
+EXP-00091: Exporting questionable statistics.
+. . exporting table         MGMT_OPERATIONS_MASTER         25 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table               MGMT_OUI_ARU_MAP         27 rows exported
+EXP-00091: Exporting questionable statistics.
+. . exporting table          MGMT_PAF_APPLICATIONS         13 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table MGMT_PAF_COMP_JOBTYPE_MAPPINGS          2 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table              MGMT_PAF_JOBTYPES          4 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table        MGMT_PAF_JOBTYPE_PARAMS         17 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table          MGMT_PAF_MSG_QTABLE_1          0 rows exported
+. . exporting table          MGMT_PAF_MSG_QTABLE_2          0 rows exported
+. . exporting table          MGMT_PAF_PARAM_GROUPS          6 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table            MGMT_PAF_PROCEDURES          7 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table          MGMT_PAF_TEXTUAL_DATA          7 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                MGMT_PARAMETERS         84 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table       MGMT_PDP_COLUMN_METADATA          3 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table              MGMT_PDP_METADATA          2 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table        MGMT_PDP_PARAM_METADATA          9 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table      MGMT_PDP_SETTING_METADATA          3 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table         MGMT_PERFORMANCE_NAMES        106 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                  MGMT_POLICIES       3271 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table              MGMT_POLICY_ASSOC       1207 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table          MGMT_POLICY_ASSOC_CFG       1257 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table   MGMT_POLICY_ASSOC_CFG_PARAMS        801 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table MGMT_POLICY_ASSOC_EVAL_DETAILS        445 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table    MGMT_POLICY_ASSOC_EVAL_SUMM        166 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table          MGMT_POLICY_BIND_VARS        169 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table         MGMT_POLICY_PARAMETERS         27 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table      MGMT_POLICY_TYPE_VERSIONS        585 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table      MGMT_POLICY_VIOL_CTXT_DEF        642 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                     MGMT_PRIVS         24 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table               MGMT_PRIV_GRANTS        133 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table             MGMT_PRIV_INCLUDES         13 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table           MGMT_PROV_COLLECTION          2 rows exported
+EXP-00091: Exporting questionable statistics.
+. . exporting table             MGMT_PROV_HARDWARE          1 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table           MGMT_PROV_TGT_STATUS          1 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table              MGMT_PURGE_POLICY         16 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table        MGMT_PURGE_POLICY_GROUP          7 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table MGMT_PURGE_POLICY_TARGET_STATE         36 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table           MGMT_REBUILD_INDEXES          1 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table    MGMT_REPOS_TIME_COEFFICIENT          0 rows exported
+EXP-00091: Exporting questionable statistics.
+. . exporting table                     MGMT_ROLES          1 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table               MGMT_ROLE_GRANTS          1 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table           MGMT_ROWSET_HANDLERS         14 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table        MGMT_RT_BOOTSTRAP_TIMES          5 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                  MGMT_SEC_INFO          1 rows exported
+EXP-00091: Exporting questionable statistics.
+. . exporting table       MGMT_SNAPSHOT_METRIC_MAP        221 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table             MGMT_SPACE_METRICS          1 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table      MGMT_STORAGE_REPORT_ALIAS         44 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table       MGMT_STORAGE_REPORT_DATA         44 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table     MGMT_STORAGE_REPORT_ISSUES          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table       MGMT_STORAGE_REPORT_KEYS         58 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table MGMT_STORAGE_REPORT_UI_TARGETS
+. . exporting table      MGMT_STORAGE_TMP_NFS_DATA
+. . exporting table     MGMT_STRING_METRIC_HISTORY         74 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table    MGMT_SWLIB_DATA_DIRECTORIES          1 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table         MGMT_SWLIB_DIRECTORIES         88 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table            MGMT_SWLIB_ENTITIES        180 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table         MGMT_SWLIB_ENTITY_DATA        150 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table    MGMT_SWLIB_ENTITY_DOCUMENTS        364 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table   MGMT_SWLIB_ENTITY_PARAMETERS        180 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table   MGMT_SWLIB_ENTITY_REFERENCES          2 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table    MGMT_SWLIB_ENTITY_REVISIONS        182 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table     MGMT_SWLIB_MATURITY_STATUS          3 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table MGMT_SWLIB_REVISION_PARAMETERS        728 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table    MGMT_SYSTEM_PERFORMANCE_LOG        183 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                   MGMT_TARGETS          5 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table      MGMT_TARGET_ADD_CALLBACKS         13 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table             MGMT_TARGET_ASSOCS          6 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table         MGMT_TARGET_ASSOC_DEFS         15 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table        MGMT_TARGET_ASSOC_ERROR          4 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table       MGMT_TARGET_ASSOC_STATUS          4 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table        MGMT_TARGET_CREDENTIALS          1 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table  MGMT_TARGET_DELETE_EXCEPTIONS         35 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table         MGMT_TARGET_PROPERTIES        204 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table          MGMT_TARGET_PROP_DEFS        288 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table       MGMT_TARGET_ROLLUP_TIMES        130 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table          MGMT_TARGET_TEMP_LIST
+. . exporting table              MGMT_TARGET_TYPES         28 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table MGMT_TARGET_TYPE_COMPONENT_MAP          5 rows exported
+EXP-00091: Exporting questionable statistics.
+. . exporting table      MGMT_TARGET_TYPE_VERSIONS         37 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table               MGMT_TASK_QTABLE         28 rows exported
+. . exporting table        MGMT_TASK_WORKER_COUNTS          2 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table           MGMT_TYPE_PROPERTIES         75 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table            MGMT_USER_CALLBACKS         27 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                  MGMT_USER_CAS          2 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table              MGMT_USER_CONTEXT          4 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table              MGMT_USER_FOLDERS         24 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                 MGMT_USER_JOBS          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table          MGMT_USER_REPORT_DEFS          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table     MGMT_USER_SUBTAB_COL_PREFS         41 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table              MGMT_USER_TARGETS          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table            MGMT_USER_TEMPLATES          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                  MGMT_VERSIONS          5 rows exported
+EXP-00091: Exporting questionable statistics.
+. . exporting table     MGMT_VIEW_USER_CREDENTIALS          1 rows exported
+EXP-00091: Exporting questionable statistics.
+. . exporting table                MGMT_VIOLATIONS       2119 rows exported
+. . exporting table         MGMT_VIOLATION_CONTEXT         80 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table     MGMT_V_CLUSTER_MEMBER_LIST
+. . exporting table  MGMT_V_CLUSTER_RAC_POL_DETAIL
+. . exporting table   MGMT_V_RAC_ASSOC_MEMBER_LIST
+. . exporting table         MGMT_V_RAC_MEMBER_LIST
+. about to export MGMT_VIEW's tables via Conventional Path ...
+. exporting synonyms
+. exporting views
+. exporting referential integrity constraints
+. exporting stored procedures
+. exporting operators
+. exporting indextypes
+. exporting bitmap, functional and extensible indexes
+. exporting posttables actions
+. exporting triggers
+. exporting materialized views
+. exporting snapshot logs
+. exporting job queues
+. exporting refresh groups and children
+. exporting dimensions
+. exporting post-schema procedural objects and actions
+. exporting user history table
+. exporting default and system auditing options
+. exporting statistics
+Export terminated successfully with warnings.

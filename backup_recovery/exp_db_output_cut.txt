@@ -1,0 +1,87 @@
+oracle_stud@hades:/app/oracle_stud/oradata/dbarc02/export> exp system/manager file=${ORACLE_SID}_full full=y log=${ORACLE_SID}_full
+
+Export: Release 11.2.0.1.0 - Production on Fri Jun 21 08:25:03 2013
+Copyright (c) 1982, 2009, Oracle and/or its affiliates.  All rights reserved.
+Connected to: Oracle Database 11g Enterprise Edition Release 11.2.0.1.0 - 64bit Production
+With the Partitioning, OLAP, Data Mining and Real Application Testing options
+Export done in US7ASCII character set and AL16UTF16 NCHAR character set
+server uses AL32UTF8 character set (possible charset conversion)
+
+About to export the entire database ...
+. exporting tablespace definitions
+. exporting profiles
+. exporting user definitions
+. exporting roles
+. exporting resource costs
+. exporting rollback segment definitions
+. exporting database links
+. exporting sequence numbers
+. exporting directory aliases
+. exporting context namespaces
+. exporting foreign function library names
+. exporting PUBLIC type synonyms
+. exporting private type synonyms
+. exporting object type definitions
+. exporting system procedural objects and actions
+. exporting pre-schema procedural objects and actions
+. exporting cluster definitions
+. about to export SYSTEM's tables via Conventional Path ...
+. . exporting table                    DEF$_AQCALL          0 rows exported
+. . exporting table                   DEF$_AQERROR          0 rows exported
+. . exporting table                  DEF$_CALLDEST          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table               DEF$_DEFAULTDEST          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table               DEF$_DESTINATION          0 rows exported
+
+[... output gekuerzt ...]
+
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                       OL$HINTS          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                       OL$NODES          0 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. about to export SCOTT's tables via Conventional Path ...
+. . exporting table                           DEPT          4 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                            EMP         14 rows exported
+EXP-00091: Exporting questionable statistics.
+
+[... output gekuerzt ...]
+
+. . exporting table                MGMT_VIOLATIONS       2119 rows exported
+. . exporting table         MGMT_VIOLATION_CONTEXT         80 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table     MGMT_V_CLUSTER_MEMBER_LIST
+. . exporting table  MGMT_V_CLUSTER_RAC_POL_DETAIL
+. . exporting table   MGMT_V_RAC_ASSOC_MEMBER_LIST
+. . exporting table         MGMT_V_RAC_MEMBER_LIST
+. about to export MGMT_VIEW's tables via Conventional Path ...
+. exporting synonyms
+. exporting views
+. exporting referential integrity constraints
+. exporting stored procedures
+. exporting operators
+. exporting indextypes
+. exporting bitmap, functional and extensible indexes
+. exporting posttables actions
+. exporting triggers
+. exporting materialized views
+. exporting snapshot logs
+. exporting job queues
+. exporting refresh groups and children
+. exporting dimensions
+. exporting post-schema procedural objects and actions
+. exporting user history table
+. exporting default and system auditing options
+. exporting statistics
+Export terminated successfully with warnings.
