@@ -298,32 +298,338 @@ SYS					0 08-MAR-13
 \end{lstlisting}
 
 \subsection{User Scott wieder erstellen}
+Mit den folgenden Statements haben wir den User Scott neu erstellt und geprüft, ob die Erstellung erfolgreich war:
+\begin{lstlisting}
+SQL> CREATE USER scott IDENTIFIED BY tiger
+  2  DEFAULT TABLESPACE users
+  3  QUOTA UNLIMITED ON users;
+User created.
 
+SQL> GRANT CONNECT TO scott;
+Grant succeeded.
+
+SQL> ALTER USER scott DEFAULT ROLE all;
+User altered.
+
+SQL> select * from all_users;
+USERNAME			  USER_ID CREATED
+------------------------------ ---------- ---------
+MGMT_VIEW			       35 08-MAR-13
+SYSMAN				       33 08-MAR-13
+SCOTT				       36 21-JUN-13
+APPQOSSYS			       31 08-MAR-13
+DBSNMP				       30 08-MAR-13
+ORACLE_OCM			       21 08-MAR-13
+DIP				       14 08-MAR-13
+OUTLN					9 08-MAR-13
+SYSTEM					5 08-MAR-13
+SYS					0 08-MAR-13
+10 rows selected.
+\end{lstlisting}
 
 \subsection{Daten importieren}
+Die in folgendem Listing enthaltenen Fehlermeldungen resp. Warnungen (bzgl. dem System-Tablespace) zeigen, dass die Erstellung des Benutzers zuvor noch nicht korrekt war. Mit diesen Warnungen werden zwar die Tabellen erstellt, allerdings fehlen danach die Datensätze.
 
+\begin{lstlisting}
+oracle_stud@hades:/app/oracle_stud/oradata/dbarc02/export> imp system/manager file=${ORACLE_SID}_full fromuser=scott touser=scott
+
+Import: Release 11.2.0.1.0 - Production on Fri Jun 21 09:17:32 2013
+
+Copyright (c) 1982, 2009, Oracle and/or its affiliates.  All rights reserved.
+
+
+Connected to: Oracle Database 11g Enterprise Edition Release 11.2.0.1.0 - 64bit Production
+With the Partitioning, OLAP, Data Mining and Real Application Testing options
+
+Export file created by EXPORT:V11.02.00 via conventional path
+import done in US7ASCII character set and AL16UTF16 NCHAR character set
+import server uses AL32UTF8 character set (possible charset conversion)
+. importing SCOTT's objects into SCOTT
+. . importing table                         "DEPT"
+IMP-00058: ORACLE error 1950 encountered
+ORA-01950: no privileges on tablespace 'SYSTEM'
+. . importing table                          "EMP"
+IMP-00058: ORACLE error 1950 encountered
+ORA-01950: no privileges on tablespace 'SYSTEM'
+. . importing table                     "SALGRADE"
+IMP-00058: ORACLE error 1950 encountered
+ORA-01950: no privileges on tablespace 'SYSTEM'
+About to enable constraints...
+Import terminated successfully with warnings
+\end{lstlisting}
+
+Eine Analyse des Problems und des Dump-Files (einfaches anschauen mittels \emph{less}) ergab, dass die Tabellen \emph{dept} und \emph{emp} vor dem Export nicht im Users-Tablespace, sondern im System-Tablespace lagen. Da es ohne Umwege mit dem Utility \emph{imp} nicht möglich ist, die Tabellen des Benutzers in einen anderen Tablespace zu importieren, haben wir dem User Scott ebenfalls Platz auf dem System-Tablespace gegeben:
+\begin{lstlisting}
+oracle_stud@hades:/app/oracle_stud/oradata/dbarc02/export> sqlplus system/manager
+
+SQL*Plus: Release 11.2.0.1.0 Production on Fri Jun 21 10:04:14 2013
+Copyright (c) 1982, 2009, Oracle.  All rights reserved.
+
+Connected to:
+Oracle Database 11g Enterprise Edition Release 11.2.0.1.0 - 64bit Production
+With the Partitioning, OLAP, Data Mining and Real Application Testing options
+
+SQL> ALTER USER scott QUOTA UNLIMITED ON system;
+
+User altered.
+\end{lstlisting}
+
+Diese Anpassung haben wir nach einem erneuten Entfernen und Neu-Erstellung des Benutzers scott vorgenommen. Der Import läuft nun ordnungsgemäss durch:
+\begin{lstlisting}
+oracle_stud@hades:/app/oracle_stud/oradata/dbarc02/export> imp system/manager file=${ORACLE_SID}_full fromuser=scott touser=scott
+
+Import: Release 11.2.0.1.0 - Production on Fri Jun 21 10:13:12 2013
+
+Copyright (c) 1982, 2009, Oracle and/or its affiliates.  All rights reserved.
+
+
+Connected to: Oracle Database 11g Enterprise Edition Release 11.2.0.1.0 - 64bit Production
+With the Partitioning, OLAP, Data Mining and Real Application Testing options
+
+Export file created by EXPORT:V11.02.00 via conventional path
+import done in US7ASCII character set and AL16UTF16 NCHAR character set
+import server uses AL32UTF8 character set (possible charset conversion)
+. importing SCOTT's objects into SCOTT
+. . importing table                         "DEPT"          4 rows imported
+. . importing table                          "EMP"         14 rows imported
+. . importing table                     "SALGRADE"          5 rows imported
+About to enable constraints...
+Import terminated successfully without warnings.
+\end{lstlisting}
 
 \subsection{User Scott testen}
+Nach dem Zurückladen der Daten melden wir uns an und prüfen das Vorhandensein der Tabellen von Scott:
+\begin{lstlisting}
+oracle_stud@hades:/app/oracle_stud/oradata/dbarc02/export> sqlplus scott/tiger
+
+SQL*Plus: Release 11.2.0.1.0 Production on Fri Jun 21 10:15:08 2013
+
+Copyright (c) 1982, 2009, Oracle.  All rights reserved.
+
+Error accessing PRODUCT_USER_PROFILE
+Warning:  Product user profile information not loaded!
+You may need to run PUPBLD.SQL as SYSTEM
+
+Connected to:
+Oracle Database 11g Enterprise Edition Release 11.2.0.1.0 - 64bit Production
+With the Partitioning, OLAP, Data Mining and Real Application Testing options
+
+SQL> desc emp;
+ Name					   Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ EMPNO					   NOT NULL NUMBER(4)
+ ENAME						    VARCHAR2(10)
+ JOB						    VARCHAR2(9)
+ MGR						    NUMBER(4)
+ HIREDATE					    DATE
+ SAL						    NUMBER(7,2)
+ COMM						    NUMBER(7,2)
+ DEPTNO 					    NUMBER(2)
+
+SQL> select * from dept;
+
+    DEPTNO DNAME	  LOC
+---------- -------------- -------------
+	10 ACCOUNTING	  NEW YORK
+	20 RESEARCH	  DALLAS
+	30 SALES	  CHICAGO
+	40 OPERATIONS	  BOSTON
+
+\end{lstlisting}
 
 
+\section{Cold Backup}
+\subsection{DB Stop}
+Wir fahren die DB gemäss Anleitung in der Aufgabenstellung herunter:
+\begin{lstlisting}
+oracle_stud@hades:/app/oracle_stud/oradata/dbarc02/export> sqlplus /nolog
 
-\section{Views}
-\subsection{Rechte auf Views}
-\subsubsection{Vergleich Möglichkeiten MySql}
-\subsubsection{Vergleich Möglichkeiten MS-SQL}
+SQL*Plus: Release 11.2.0.1.0 Production on Fri Jun 21 10:20:36 2013
 
-\subsection{DDL-Änderungen an den Basistabellen}
-\subsubsection{Vergleich Möglichkeiten MySql}
-\subsubsection{Vergleich Möglichkeiten MS-SQL}
+Copyright (c) 1982, 2009, Oracle.  All rights reserved.
 
-\subsection{Updatable Views}
-\subsubsection{Vergleich Möglichkeiten MySql}
-\subsubsection{Vergleich Möglichkeiten MS-SQL}
+SQL> CONNECT / as sysdba
+Connected.
+SQL> SHUTDOWN IMMEDIATE
+Database closed.
+Database dismounted.
+ORACLE instance shut down.
+\end{lstlisting}
 
-\subsection{WITH CHECK OPTION}
-\subsubsection{Vergleich Möglichkeiten MySql}
-\subsubsection{Vergleich Möglichkeiten MS-SQL}
+Die Kontrolle mittels des ps-Befehls zeigt, dass unsere Instanz (dbarc02) erfolgreich beendet wurde:
+\begin{lstlisting}
+oracle_stud@hades:/app/oracle_stud/oradata/dbarc02/export> ps -ef | grep smon
+1001       641     1  0 Jun14 ?        00:00:14 ora_smon_dbarc01
+1001      2907     1  0 May30 ?        00:01:34 ora_smon_dbarc04
+1001      2957     1  0 Jun18 ?        00:00:06 ora_smon_dbarc07
+1001     12380     1  0 May01 ?        00:01:43 ora_smon_dbarc08
+oracle   12826     1  0 Mar01 ?        00:05:11 ora_smon_hades11g
+1001     14183     1  0 Mar15 ?        00:02:18 ora_smon_dbarc06
+1001     20249     1  0 Mar08 ?        00:06:40 ora_smon_mydb
+1001     26856 20395  0 10:22 pts/0    00:00:00 grep smon
+oracle   29737     1  0 Mar01 ?        00:04:15 ora_smon_ananke
+1001     30687     1  0 Jun07 ?        00:00:39 ora_smon_dbarc05
+\end{lstlisting}
+
+\subsection{Sicherung}
+Die Sicherung besteht nun aus einem einfachen Datei-Kopiervorgang. Da die Datenbank-Instanz zuvor gestoppt wurde, sind die Dateien in einem konsistenten Zustand.
+
+\begin{lstlisting}
+oracle_stud@hades:/app/oracle_stud/oradata/dbarc02/data> cp -v * ../cold_backup/
+`control01.ctl' -> `../cold_backup/control01.ctl'
+`control02.ctl' -> `../cold_backup/control02.ctl'
+`control03.ctl' -> `../cold_backup/control03.ctl'
+`redo01.log' -> `../cold_backup/redo01.log'
+`redo02.log' -> `../cold_backup/redo02.log'
+`redo03.log' -> `../cold_backup/redo03.log'
+`sysaux01.dbf' -> `../cold_backup/sysaux01.dbf'
+`system01.dbf' -> `../cold_backup/system01.dbf'
+`temp01.dbf' -> `../cold_backup/temp01.dbf'
+`undotbs01.dbf' -> `../cold_backup/undotbs01.dbf'
+`users01.dbf' -> `../cold_backup/users01.dbf'
+\end{lstlisting}
+
+\subsection{Neustart, Test, Modifikation}
+Da auf der Tabelle ein Primary-Key definiert ist, funktioniert das angegebene Insert-Statement nicht. Wir haben stattdessen mit dem folgenden Statement eine neue Zeile hinzugefügt und die Anzahl Zeilen geprüft.
+\begin{lstlisting}
+SQL> INSERT INTO "SCOTT"."EMP" (EMPNO, ENAME, JOB, HIREDATE, SAL, DEPTNO) VALUES ('1337', 'TEST', 'BOSS', TO_DATE('23-JAN-82', 'DD-MON-RR'), '1337', '10')
+
+SQL> select count(*) from emp;                   
+
+  COUNT(*)
+----------
+	15
+\end{lstlisting}
+
+\subsection{Fehler provozieren}
+Die Tabelle \emph{emp} liegt im \emph{System}-Tablespace, daher benennen wir dieses File um.
+
+Danach tritt beim angegebenen Statement wie erwartet ein Fehler auf (INSERT INTO und SELECT * FROM funktionierten hingegen noch, da die Informationen wohl noch im Cache vorhanden waren).
+\begin{lstlisting}
+oracle_stud@hades:/app/oracle_stud/oradata/dbarc02/data> sqlplus scott/tiger
+
+SQL*Plus: Release 11.2.0.1.0 Production on Fri Jun 21 10:49:21 2013
+Copyright (c) 1982, 2009, Oracle.  All rights reserved.
+Error accessing PRODUCT_USER_PROFILE
+Warning:  Product user profile information not loaded!
+You may need to run PUPBLD.SQL as SYSTEM
+
+Connected to:
+Oracle Database 11g Enterprise Edition Release 11.2.0.1.0 - 64bit Production
+With the Partitioning, OLAP, Data Mining and Real Application Testing options
+
+SQL> CREATE TABLE aaa AS SELECT * FROM emp;
+CREATE TABLE aaa AS SELECT * FROM emp
+                                  *
+ERROR at line 1:
+ORA-00604: error occurred at recursive SQL level 2
+ORA-01116: error in opening database file 1
+ORA-01110: data file 1: '/app/oracle_stud/oradata/dbarc02/data/system01.dbf'
+ORA-27041: unable to open file
+Linux-x86_64 Error: 2: No such file or directory
+Additional information: 3
+\end{lstlisting}
+
+\subsection{Reparatur}
+Wir konnten uns aufgrund der folgenden Fehlermeldung nicht mehr normal auf die Instanz verbinden:
+\begin{lstlisting}
+SQL> CONNECT / AS sysdba
+ERROR:
+ORA-01075: you are currently logged on
+\end{lstlisting}
+
+Informationen von \url{http://bit.ly/btEuNm} haben uns dann allerdings weitergeholfen, so dass wir die Instanz doch noch abwürgen konnten:
+\begin{lstlisting}
+oracle_stud@hades:/app/oracle_stud/oradata/dbarc02/data> sqlplus -prelim "/as sysdba"
+
+SQL*Plus: Release 11.2.0.1.0 Production on Fri Jun 21 11:00:44 2013
+
+Copyright (c) 1982, 2009, Oracle.  All rights reserved.
+
+SQL> SHUTDOWN ABORT;
+ORACLE instance shut down.
+\end{lstlisting}
+
+Nach dem Stop der Instanz haben wir alle Files unter Beibehaltung der Berechtigungen (Option \emph{-p} von \emph{cp}) aus dem erstellten Cold-Backup zurückkopiert und die Datenbank neu gestartet:
+\begin{lstlisting}
+oracle_stud@hades:/app/oracle_stud/oradata/dbarc02/data> rm -v * && cp -pv ../cold_backup/* .
+removed `control01.ctl'
+removed `control02.ctl'
+removed `control03.ctl'
+removed `redo01.log'
+removed `redo02.log'
+removed `redo03.log'
+removed `sysaux01.dbf'
+removed `system01.dbf_'
+removed `temp01.dbf'
+removed `undotbs01.dbf'
+removed `users01.dbf'
+`../cold_backup/control01.ctl' -> `./control01.ctl'
+`../cold_backup/control02.ctl' -> `./control02.ctl'
+`../cold_backup/control03.ctl' -> `./control03.ctl'
+`../cold_backup/redo01.log' -> `./redo01.log'
+`../cold_backup/redo02.log' -> `./redo02.log'
+`../cold_backup/redo03.log' -> `./redo03.log'
+`../cold_backup/sysaux01.dbf' -> `./sysaux01.dbf'
+`../cold_backup/system01.dbf' -> `./system01.dbf'
+`../cold_backup/temp01.dbf' -> `./temp01.dbf'
+`../cold_backup/undotbs01.dbf' -> `./undotbs01.dbf'
+`../cold_backup/users01.dbf' -> `./users01.dbf'
+
+oracle_stud@hades:/app/oracle_stud/oradata/dbarc02/data> sqlplus /nolog
+
+SQL*Plus: Release 11.2.0.1.0 Production on Fri Jun 21 11:14:46 2013
+
+Copyright (c) 1982, 2009, Oracle.  All rights reserved.
+
+SQL> CONNECT / as sysdba
+Connected to an idle instance.
+SQL> STARTUP
+ORACLE instance started.
+
+Total System Global Area  417546240 bytes
+Fixed Size		    2213936 bytes
+Variable Size		  339740624 bytes
+Database Buffers	   67108864 bytes
+Redo Buffers		    8482816 bytes
+Database mounted.
+Database opened.
+\end{lstlisting}
+
+\subsection{Test Benutzer scott}
+Wir können uns nun wieder als Scott verbinden und stellen fest, dass die Tabelle im Zustand zum Zeitpunkt des Cold-Backups wieder verfügbar ist.
+\begin{lstlisting}
+oracle_stud@hades:/app/oracle_stud/oradata/dbarc02/data> sqlplus scott/tiger
+
+SQL*Plus: Release 11.2.0.1.0 Production on Fri Jun 21 11:16:47 2013
+Copyright (c) 1982, 2009, Oracle.  All rights reserved.
+
+Error accessing PRODUCT_USER_PROFILE
+Warning:  Product user profile information not loaded!
+You may need to run PUPBLD.SQL as SYSTEM
+
+Connected to:
+Oracle Database 11g Enterprise Edition Release 11.2.0.1.0 - 64bit Production
+With the Partitioning, OLAP, Data Mining and Real Application Testing options
+
+SQL> select count(*) from emp;
+
+  COUNT(*)
+----------
+	14
+\end{lstlisting}
+
+
+\section{Archive Mode}
+yay, eberle
+
+
+\section{Hot Backup}
+yay, eberle
+
 
 \section{Reflexion}
+oh noez, schwarz?
+
 
 \end{document}
