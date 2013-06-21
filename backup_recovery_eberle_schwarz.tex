@@ -249,35 +249,63 @@ SQL> DESC emp;
 \end{lstlisting}
 
 
-\subsection{View erstellen}
-\subsubsection{Vergleich Möglichkeiten MySql}
-\subsubsection{Vergleich Möglichkeiten MS-SQL}
+\section{Export / Import einer Datenbank}
+\subsection{Export der Datenbank}
+Den Export der gesamtem Datenkbank haben wir mit dem exp-Befehl durchgeführt. Der Output umfasste ingesamt ca. 1300 Zeilen, daher haben wir hier einiges rausgeschnitten. Wir sehen, dass unter Anderem auch die Tabellen \glqq{}dep\grqq{} und \glqq{}emp\grqq{} des Benuzters scott exportiert wurden.
+\lstinputlisting{backup_recovery/exp_db_output_cut.txt}
 
-\subsection{Rollen definieren}
-\subsubsection{Vergleich Möglichkeiten MySql}
-\subsubsection{Vergleich Möglichkeiten MS-SQL}
+Wir prüfen auch hier, ob die Export-Files gemäss unseren Vorstellungen erstellt wurden. Der Full-Dump ist um ein Vielfaches grösser als der zuvor erstellte Tabellenexport.
+\begin{lstlisting}
+oracle_stud@hades:/app/oracle_stud/oradata/dbarc02/export> ls -lh
+total 42M
+-rw-r--r-- 1 oracle_stud oinstall  24K 2013-06-21 07:23 dbarc02.dmp
+-rw-r--r-- 1 oracle_stud oinstall  41M 2013-06-21 08:25 dbarc02_full.dmp
+-rw-r--r-- 1 oracle_stud oinstall  70K 2013-06-21 08:25 dbarc02_full.log
+-rw-r--r-- 1 oracle_stud oinstall 1.7K 2013-06-21 07:23 dbarc02.log
+oracle_stud@hades:/app/oracle_stud/oradata/dbarc02/export>
+\end{lstlisting}
 
-\subsection{Den Rollen Rechte zuweisen}
-\subsubsection{Vergleich Möglichkeiten MySql}
-\subsubsection{Vergleich Möglichkeiten MS-SQL}
+\subsection{User Scott samt Objekten löschen}
+Nach dem Entfernen des Benutzers überprüfen wir mit Hilfe von \emph{all\_users}, ob der Benutzer auch tatsächlich entfernt wurde.
+\begin{lstlisting}
+oracle_stud@hades:/app/oracle_stud/oradata/dbarc02/export> sqlplus system/manager
 
-\subsection{Den User Rollen zuweisen}
-\subsubsection{Vergleich Möglichkeiten MySql}
-\subsubsection{Vergleich Möglichkeiten MS-SQL}
+SQL*Plus: Release 11.2.0.1.0 Production on Fri Jun 21 08:45:10 2013
+Copyright (c) 1982, 2009, Oracle.  All rights reserved.
 
-\subsection{Überprüfen Sie die beiden Rollen}
-\subsubsection{Vergleich Möglichkeiten MySql}
-\subsubsection{Vergleich Möglichkeiten MS-SQL}
+Connected to:
+Oracle Database 11g Enterprise Edition Release 11.2.0.1.0 - 64bit Production
+With the Partitioning, OLAP, Data Mining and Real Application Testing options
 
-\section{Zugriffsrechte: Objekt- und Systemrechte}
+SQL> DROP USER scott CASCADE;
+User dropped.
 
-\subsection{Objektrechte}
-\subsubsection{Vergleich Möglichkeiten MySql}
-\subsubsection{Vergleich Möglichkeiten MS-SQL}
+SQL> select * from all_users;
 
-\subsection{Systemrechte}
-\subsubsection{Vergleich Möglichkeiten MySql}
-\subsubsection{Vergleich Möglichkeiten MS-SQL}
+USERNAME			  USER_ID CREATED
+------------------------------ ---------- ---------
+MGMT_VIEW			       35 08-MAR-13
+SYSMAN				       33 08-MAR-13
+APPQOSSYS			       31 08-MAR-13
+DBSNMP				       30 08-MAR-13
+ORACLE_OCM			       21 08-MAR-13
+DIP				       14 08-MAR-13
+OUTLN					9 08-MAR-13
+SYSTEM					5 08-MAR-13
+SYS					0 08-MAR-13
+
+9 rows selected.
+\end{lstlisting}
+
+\subsection{User Scott wieder erstellen}
+
+
+\subsection{Daten importieren}
+
+
+\subsection{User Scott testen}
+
+
 
 \section{Views}
 \subsection{Rechte auf Views}
