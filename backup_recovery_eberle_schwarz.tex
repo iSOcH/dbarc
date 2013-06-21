@@ -1,0 +1,301 @@
+\documentclass[11pt,a4paper,parskip=half]{scrartcl}
+\usepackage{ngerman}
+\usepackage[utf8]{inputenc}
+\usepackage[colorlinks=false,pdfborder={0 0 0}]{hyperref}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{longtable}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{textcomp}
+\usepackage{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{nameref}
+\geometry{a4paper, left=30mm, right=25mm, top=30mm, bottom=35mm} 
+\usepackage{listings}
+\lstset{breaklines=true, breakatwhitespace=true, basicstyle=\tiny, numbers=left, frame=single}
+\setcounter{tocdepth}{2} %no subsubsections in TOC
+
+\title{dbarc: Ausarbeitung Backup \& Recovery}
+\author{Yanick Eberle, Pascal Schwarz}
+\begin{document}
+\maketitle
+\vfill
+\tableofcontents
+
+\pagestyle{fancy}
+\section{Vorbereitung}
+\subsection{Kontrolle Dateien}
+Die genannten Files liegen bei uns im korrekten Pfad:
+\begin{lstlisting}
+oracle_stud@hades:/> ls /app/oracle_stud/oradata/${ORACLE_SID}/data/
+control01.ctl  control02.ctl  control03.ctl  redo01.log  redo02.log  redo03.log  sysaux01.dbf  system01.dbf  temp01.dbf  undotbs01.dbf  users01.dbf
+\end{lstlisting}
+
+\subsection{Noarchivelog Modus}
+Wir wechseln gemäss den Angaben in der Aufgabenstellung den Modus unserer Oracle-Instanz:
+\begin{lstlisting}
+oracle_stud@hades:/> sqlplus sys as sysdba
+
+SQL*Plus: Release 11.2.0.1.0 Production on Fri Jun 21 07:02:06 2013
+Copyright (c) 1982, 2009, Oracle.  All rights reserved.
+
+Enter password: 
+Connected to an idle instance.
+
+SQL> STARTUP MOUNT
+ORACLE instance started.
+
+Total System Global Area  417546240 bytes
+Fixed Size		    2213936 bytes
+Variable Size		  339740624 bytes
+Database Buffers	   67108864 bytes
+Redo Buffers		    8482816 bytes
+Database mounted.
+
+SQL> ALTER DATABASE NOARCHIVELOG;
+Database altered.
+
+SQL> ALTER DATABASE OPEN;
+Database altered.
+\end{lstlisting}
+
+\subsection{System entlasten}
+Bei unserer Instanz liegen die Trace-Files im angegebenen Verzeichnis in einem Unterordner \emph{trace}. Wie die Ausgabe von \emph{find ... | wc -l} zeigt, ist eine grosse Zahl dieser Dateien vorhanden:
+\begin{lstlisting}
+oracle_stud@hades:/app/oracle_stud/diag/rdbms/dbarc02/dbarc02/trace> find -iname '*.trc' | wc -l
+3787
+oracle_stud@hades:/app/oracle_stud/diag/rdbms/dbarc02/dbarc02/trace> rm *.trc
+
+\end{lstlisting}
+
+Unser Alert-Log ist mit ca. 100k noch recht kompakt, wir leeren es trotzdem.
+\begin{lstlisting}
+oracle_stud@hades:...dbarc02/trace> ls -lh alert_dbarc02.log 
+-rw-r----- 1 oracle_stud oinstall 103K 2013-06-21 07:08 alert_dbarc02.log
+oracle_stud@hades:...dbarc02/dbarc02/trace> echo -n "" > alert_dbarc02.log 
+oracle_stud@hades:...dbarc02/trace> ls -lh alert_dbarc02.log 
+-rw-r----- 1 oracle_stud oinstall 0 2013-06-21 07:17 alert_dbarc02.log
+\end{lstlisting}
+
+Wie der folgende Befehl zeigt, existiert auf dem Server Hades nirgends ein Verzeichnis \emph{bdump}:
+\begin{lstlisting}
+oracle_stud@hades:/app/oracle_stud/admin/dbarc02> find / -type d -iname 'bdump' 2>/dev/null 
+oracle_stud@hades:/app/oracle_stud/admin/dbarc02>
+\end{lstlisting}
+
+
+\section{Export / Import einer Tabelle}
+\subsection{Export}
+Nach der Anmeldung führen wir gemäss Aufgabenstellung den Export-Befehl im entsprechenden Verzeichnis aus und überprüfen mittels ls, dass die Files erzeugt wurden (da der Datenbank-Name mit unserer SID übereinstimmt, verwenden wir gleich diese exportierte Variable):
+\begin{lstlisting}
+oracle_stud@hades:/app/oracle_stud/oradata/dbarc02/export> exp scott/tiger FILE=${ORACLE_SID} LOG=${ORACLE_SID}
+
+Export: Release 11.2.0.1.0 - Production on Fri Jun 21 07:23:10 2013
+
+Copyright (c) 1982, 2009, Oracle and/or its affiliates.  All rights reserved.
+
+
+Connected to: Oracle Database 11g Enterprise Edition Release 11.2.0.1.0 - 64bit Production
+With the Partitioning, OLAP, Data Mining and Real Application Testing options
+Export done in US7ASCII character set and AL16UTF16 NCHAR character set
+server uses AL32UTF8 character set (possible charset conversion)
+. exporting pre-schema procedural objects and actions
+. exporting foreign function library names for user SCOTT 
+. exporting PUBLIC type synonyms
+. exporting private type synonyms
+. exporting object type definitions for user SCOTT 
+About to export SCOTT's objects ...
+. exporting database links
+. exporting sequence numbers
+. exporting cluster definitions
+. about to export SCOTT's tables via Conventional Path ...
+. . exporting table                           DEPT          4 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                            EMP         14 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                       SALGRADE          5 rows exported
+EXP-00091: Exporting questionable statistics.
+. exporting synonyms
+. exporting views
+. exporting stored procedures
+. exporting operators
+. exporting referential integrity constraints
+. exporting triggers
+. exporting indextypes
+. exporting bitmap, functional and extensible indexes
+. exporting posttables actions
+. exporting materialized views
+. exporting snapshot logs
+. exporting job queues
+. exporting refresh groups and children
+. exporting dimensions
+. exporting post-schema procedural objects and actions
+. exporting statistics
+Export terminated successfully with warnings.
+
+
+oracle_stud@hades:/app/oracle_stud/oradata/dbarc02/export> ls -lh
+total 28K
+-rw-r--r-- 1 oracle_stud oinstall  24K 2013-06-21 07:23 dbarc02.dmp
+-rw-r--r-- 1 oracle_stud oinstall 1.7K 2013-06-21 07:23 dbarc02.log
+\end{lstlisting}
+
+\subsection{Tabelle löschen}
+Das folgende Listing zeigt das Löschen der \emph{emp}-Tabelle.
+
+\begin{lstlisting}
+oracle_stud@hades:/app/oracle_stud/oradata/dbarc02/export> sqlplus scott/tiger
+
+SQL*Plus: Release 11.2.0.1.0 Production on Fri Jun 21 07:30:04 2013
+Copyright (c) 1982, 2009, Oracle.  All rights reserved.
+
+Error accessing PRODUCT_USER_PROFILE
+Warning:  Product user profile information not loaded!
+You may need to run PUPBLD.SQL as SYSTEM
+
+Connected to:
+Oracle Database 11g Enterprise Edition Release 11.2.0.1.0 - 64bit Production
+With the Partitioning, OLAP, Data Mining and Real Application Testing options
+
+SQL> DESC emp;
+ Name					   Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ EMPNO					   NOT NULL NUMBER(4)
+ ENAME						    VARCHAR2(10)
+ JOB						    VARCHAR2(9)
+ MGR						    NUMBER(4)
+ HIREDATE					    DATE
+ SAL						    NUMBER(7,2)
+ COMM						    NUMBER(7,2)
+ DEPTNO 					    NUMBER(2)
+
+SQL> DROP TABLE emp;
+Table dropped.
+
+SQL> DESC emp;
+ERROR:
+ORA-04043: object emp does not exist
+\end{lstlisting}
+
+\subsection{Tabelle zurückladen}
+Wir führen den Import-Befehl wiederum gemäss Aufgabenstellung aus. Bei der ersten Frage (\glqq{}Import Data Only?\grqq{}), deren Antwort nicht in der Aufgabe vorgegeben ist, haben wir mit \glqq{}Yes\grqq{} geantwortet. 
+
+Die Beantwortung mit \glqq{}No\grqq{} führt dazu, dass der Import-Befehl die Tabelle nicht erstellt und legiglich versucht, Datensätze einzufügen. Da die Tabelle zuvor aber entfernt wurde, schlägt dies fehl.
+
+\begin{lstlisting}
+oracle_stud@hades:/app/oracle_stud/oradata/dbarc02/export> imp scott/tiger
+
+Import: Release 11.2.0.1.0 - Production on Fri Jun 21 07:43:07 2013
+Copyright (c) 1982, 2009, Oracle and/or its affiliates.  All rights reserved.
+Connected to: Oracle Database 11g Enterprise Edition Release 11.2.0.1.0 - 64bit Production
+With the Partitioning, OLAP, Data Mining and Real Application Testing options
+
+Import data only (yes/no): no > 
+Import file: expdat.dmp > dbarc02.dmp
+Enter insert buffer size (minimum is 8192) 30720> 
+
+Export file created by EXPORT:V11.02.00 via conventional path
+import done in US7ASCII character set and AL16UTF16 NCHAR character set
+import server uses AL32UTF8 character set (possible charset conversion)
+
+List contents of import file only (yes/no): no > 
+Ignore create error due to object existence (yes/no): no > 
+Import grants (yes/no): yes > 
+Import table data (yes/no): yes > 
+Import entire export file (yes/no): no > 
+Username: scott
+Enter table(T) or partition(T:P) names. Null list means all tables for user
+Enter table(T) or partition(T:P) name or . if done: emp
+Enter table(T) or partition(T:P) name or . if done: .
+
+. importing SCOTT's objects into SCOTT
+. importing SCOTT's objects into SCOTT
+. . importing table                          "EMP"         14 rows imported
+About to enable constraints...
+Import terminated successfully without warnings.
+\end{lstlisting}
+
+\subsection{Tabelle prüfen}
+Die Tabelle konnte erfolgreich wiederhergestellt werden:
+
+\begin{lstlisting}
+oracle_stud@hades:/app/oracle_stud/oradata/dbarc02/export> sqlplus scott/tiger
+
+SQL*Plus: Release 11.2.0.1.0 Production on Fri Jun 21 07:45:46 2013
+Copyright (c) 1982, 2009, Oracle.  All rights reserved.
+Error accessing PRODUCT_USER_PROFILE
+Warning:  Product user profile information not loaded!
+You may need to run PUPBLD.SQL as SYSTEM
+
+Connected to:
+Oracle Database 11g Enterprise Edition Release 11.2.0.1.0 - 64bit Production
+With the Partitioning, OLAP, Data Mining and Real Application Testing options
+
+SQL> DESC emp;
+ Name					   Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ EMPNO					   NOT NULL NUMBER(4)
+ ENAME						    VARCHAR2(10)
+ JOB						    VARCHAR2(9)
+ MGR						    NUMBER(4)
+ HIREDATE					    DATE
+ SAL						    NUMBER(7,2)
+ COMM						    NUMBER(7,2)
+ DEPTNO 					    NUMBER(2)
+\end{lstlisting}
+
+
+\subsection{View erstellen}
+\subsubsection{Vergleich Möglichkeiten MySql}
+\subsubsection{Vergleich Möglichkeiten MS-SQL}
+
+\subsection{Rollen definieren}
+\subsubsection{Vergleich Möglichkeiten MySql}
+\subsubsection{Vergleich Möglichkeiten MS-SQL}
+
+\subsection{Den Rollen Rechte zuweisen}
+\subsubsection{Vergleich Möglichkeiten MySql}
+\subsubsection{Vergleich Möglichkeiten MS-SQL}
+
+\subsection{Den User Rollen zuweisen}
+\subsubsection{Vergleich Möglichkeiten MySql}
+\subsubsection{Vergleich Möglichkeiten MS-SQL}
+
+\subsection{Überprüfen Sie die beiden Rollen}
+\subsubsection{Vergleich Möglichkeiten MySql}
+\subsubsection{Vergleich Möglichkeiten MS-SQL}
+
+\section{Zugriffsrechte: Objekt- und Systemrechte}
+
+\subsection{Objektrechte}
+\subsubsection{Vergleich Möglichkeiten MySql}
+\subsubsection{Vergleich Möglichkeiten MS-SQL}
+
+\subsection{Systemrechte}
+\subsubsection{Vergleich Möglichkeiten MySql}
+\subsubsection{Vergleich Möglichkeiten MS-SQL}
+
+\section{Views}
+\subsection{Rechte auf Views}
+\subsubsection{Vergleich Möglichkeiten MySql}
+\subsubsection{Vergleich Möglichkeiten MS-SQL}
+
+\subsection{DDL-Änderungen an den Basistabellen}
+\subsubsection{Vergleich Möglichkeiten MySql}
+\subsubsection{Vergleich Möglichkeiten MS-SQL}
+
+\subsection{Updatable Views}
+\subsubsection{Vergleich Möglichkeiten MySql}
+\subsubsection{Vergleich Möglichkeiten MS-SQL}
+
+\subsection{WITH CHECK OPTION}
+\subsubsection{Vergleich Möglichkeiten MySql}
+\subsubsection{Vergleich Möglichkeiten MS-SQL}
+
+\section{Reflexion}
+
+\end{document}
