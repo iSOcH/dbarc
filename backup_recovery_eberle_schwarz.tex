@@ -622,21 +622,397 @@ SQL> select count(*) from emp;
 
 \section{Archive Mode}
 \subsection{Vorbereitung}
-\subsubsection{Anmeldung}
-\begin{lstlisting}
-\end{lstlisting}
 \subsubsection{Archive-Mode aktivieren}
+Wir aktivieren den Archive-Mode mit folgenden Befehlen:
+\begin{lstlisting}
+oracle_stud@hades:~> export ORACLE_SID=dbarc02
+oracle_stud@hades:~> sqlplus /nolog
+
+SQL*Plus: Release 11.2.0.1.0 Production on Sun Jun 23 17:34:06 2013
+
+Copyright (c) 1982, 2009, Oracle.  All rights reserved.
+
+SQL> connect / as sysdba
+Connected.
+
+SQL> SHUTDOWN immediate
+Database closed.
+Database dismounted.
+ORACLE instance shut down.
+
+SQL> STARTUP MOUNT;
+ORACLE instance started.
+
+Total System Global Area  417546240 bytes
+Fixed Size                  2213936 bytes
+Variable Size             339740624 bytes
+Database Buffers           67108864 bytes
+Redo Buffers                8482816 bytes
+Database mounted.
+
+SQL> ALTER database archivelog;
+
+Database altered.
+
+SQL> ALTER database open;
+
+Database altered.
+\end{lstlisting}
 \subsubsection{Platz schaffen}
+Wir wollen zuerst herausfinden, wie viel virtueller Platz noch vorhanden ist. Dazu führen wir im Oracle SQL Developer folgendes Skript aus:
+\begin{lstlisting}
+SELECT
+substr(name, 1, 30) name,
+space_limit AS quota,
+space_used AS used,
+space_reclaimable AS reclaimable,
+number_of_files AS files
+FROM v$recovery_file_dest ;
+
+NAME                                QUOTA       USED RECLAIMABLE      FILES
+------------------------------ ---------- ---------- ----------- ----------
+/app/oracle/flash_recovery_are    5.4E+10    4.8E+10     2.5E+10        528 
+\end{lstlisting}
+Das Resultat zeigt uns nun, dass 4.8G von 5.2G belegt sind.
+
+Wir vergrössern nun den verfügbaren Platz mit folgendem Befehl:
+\begin{lstlisting}
+SQL> alter system set db_recovery_file_dest_size=10G;
+
+System altered.
+\end{lstlisting}
+
 \subsubsection{Situation anzeigen}
+Wir zeigen die aktuelle Situation an und sehen, dass der Archive Mode aktiviert ist:
+\begin{lstlisting}
+SQL> ARCHIVE LOG LIST;
+Database log mode              Archive Mode
+Automatic archival             Enabled
+Archive destination            /app/oracle_stud/oradata/dbarc02/archive
+Oldest online log sequence     251
+Next log sequence to archive   253
+Current log sequence           253
+\end{lstlisting}
+
 \subsubsection{Cold-Backup erstellen}
+Wir erstellen nun ein Cold-Backup:
+\begin{lstlisting}
+// Shutdown SQL Instance
+SQL> CONNECT / as sysdba
+Connected.
+SQL> SHUTDOWN immediate
+Database closed.
+Database dismounted.
+ORACLE instance shut down.
+
+// Dateien sichern durch Kopieren
+oracle_stud@hades:~> cd /app/oracle_stud/oradata/dbarc02/data
+oracle_stud@hades:/app/oracle_stud/oradata/dbarc02/data> cp * ../cold_backup/
+
+//System entlasten, alte Dateien löschen
+oracle_stud@hades:~>cd /app/oracle_stud/oradata/dbarc02/archive
+oracle_stud@hades:/app/oracle_stud/oradata/dbarc02/archive>find . * -mtime +1 -exec rm {} \;
+
+//Startup SQL Instance
+oracle_stud@hades:~> sqlplus / as sysdba
+
+SQL*Plus: Release 11.2.0.1.0 Production on Sun Jun 23 17:59:42 2013
+
+Copyright (c) 1982, 2009, Oracle.  All rights reserved.
+
+Connected to an idle instance.
+
+SQL> STARTUP
+ORACLE instance started.
+
+Total System Global Area  417546240 bytes
+Fixed Size                  2213936 bytes
+Variable Size             339740624 bytes
+Database Buffers           67108864 bytes
+Redo Buffers                8482816 bytes
+Database mounted.
+Database opened.
+\end{lstlisting}
 
 \subsection{Versuch 1}
-\subsubsection{Arbeiten}
+\subsubsection{Connect als Scott}
+Wir verbinden uns als User Scott:
+\begin{lstlisting}
+SQL> CONNECT scott/tiger
+Error accessing PRODUCT_USER_PROFILE
+Warning:  Product user profile information not loaded!
+You may need to run PUPBLD.SQL as SYSTEM
+Connected.
+\end{lstlisting}
+
+\subsubsection{Tabelle emp anpassen}
+Nun verändern wir die Tabelle emp und stellen sicher, dass 112 Datensätze vorhanden  sind:
+\begin{lstlisting}
+SQL> INSERT INTO emp SELECT * FROM emp;
+INSERT INTO emp SELECT * FROM emp
+*
+ERROR at line 1:
+ORA-00001: unique constraint (SCOTT.PK_EMP) violated
+\end{lstlisting}
+
+Da ein Unique Key vorhande ist, müssen wir das Skript ein wenig anpassen, um weitere Daten hinzuzufügen:
+\begin{lstlisting}
+SQL> insert into emp SELECT (empno/2),ename,job,mgr,hiredate,sal,comm,deptno FROM emp;
+
+14 rows created.
+
+SQL> insert into emp SELECT (empno-100),ename,job,mgr,hiredate,sal,comm,deptno FROM emp;
+
+28 rows created.
+
+SQL> insert into emp SELECT (empno-1000),ename,job,mgr,hiredate,sal,comm,deptno FROM emp;
+
+56 rows created.
+
+SQL> commit;
+
+Commit complete.
+\end{lstlisting}
+
+Wir fügen nun Daten ein, bis wir 112 Datensätze haben.
+\begin{lstlisting}
+SQL> select count (*) from emp;
+
+  COUNT(*)
+----------
+       112
+\end{lstlisting}
+
+\subsubsection{Tabelle viewing erstellen}
+Die Tabelle Viewing ist nicht vorhanden, weshalb wir diese nun erstellen:
+\begin{lstlisting}
+SQL> DESC viewing;
+ERROR:
+ORA-04043: object viewing does not exist
+
+SQL> CREATE TABLE viewing as SELECT * FROM emp;
+
+Table created.
+
+SQL> select count(*) from viewing;
+
+  COUNT(*)
+----------
+       112
+\end{lstlisting}
+
+\subsubsection{Zeitpunkt A}
+Wir halten nun den Zeitpunkt A fest:
+\begin{lstlisting}
+SELECT TO_CHAR( SYSDATE, 'yyyy-MM-dd:HH24:MI:SS')
+FROM dual;
+
+TO_CHAR(SYSDATE,'YYYY-MM-DD:HH24:MI:SS')
+----------------------------------------
+2013-06-23:18:28:52                      
+\end{lstlisting}
+
+\subsubsection{Tabelle dept anpassen}
+Auch hier ist der Primary Key ein Problem, weshalb wir wiederum das Skript ein wenig anpassen:
+\begin{lstlisting}
+SQL> INSERT INTO dept SELECT * FROM dept;
+INSERT INTO dept SELECT * FROM dept
+*
+ERROR at line 1:
+ORA-00001: unique constraint (SCOTT.PK_DEPT) violated
+
+SQL> INSERT INTO dept SELECT (deptno+1),dname,loc FROM dept;
+
+4 rows created.
+
+SQL> INSERT INTO dept SELECT (deptno+2),dname,loc FROM dept;
+
+8 rows created.
+
+SQL> INSERT INTO dept SELECT (deptno+4),dname,loc FROM dept;
+
+16 rows created.
+
+SQL> select count(*) from dept;
+
+  COUNT(*)
+----------
+        32
+\end{lstlisting}
+
+\subsubsection{Zeitpunkt B}
+Wir halten nun den Zeitpunkt B fest:
+\begin{lstlisting}
+SELECT TO_CHAR( SYSDATE, 'yyyy-MM-dd:HH24:MI:SS')
+FROM dual;
+
+TO_CHAR(SYSDATE,'YYYY-MM-DD:HH24:MI:SS')
+----------------------------------------
+2013-06-23:18:41:09  
+\end{lstlisting}
+
+\subsubsection{Tabelle viewing löschen}
+\begin{lstlisting}
+SQL> DROP TABLE viewing;
+
+Table dropped.
+
+SQL> commit;
+
+Commit complete.
+\end{lstlisting}
+
+\subsubsection{Zeitpunkt C}
+Wir halten nun den Zeitpunkt C fest:
+\begin{lstlisting}
+SELECT TO_CHAR( SYSDATE, 'yyyy-MM-dd:HH24:MI:SS')
+FROM dual;
+
+TO_CHAR(SYSDATE,'YYYY-MM-DD:HH24:MI:SS')
+----------------------------------------
+2013-06-23:18:42:47     
+\end{lstlisting}
+
 \subsubsection{Reparatur}
+Wir wollen die Datenbank reparieren. Dies machen wir, indem wir die Instanz herunterfahren, die *.dbf Dateien des Cold-Backups zurückholen und die Instanz wieder starten. Anschliessend fahren wir mit den Archive-Logs auf den Zeitpunkt B und prüfen die Situation.
+
+\begin{lstlisting}
+//Shutdown Instance
+SQL> CONNECT / as sysdba
+Connected.
+SQL> SHUTDOWN IMMEDIATE
+Database closed.
+Database dismounted.
+ORACLE instance shut down.
+
+//Restore .dbf Files
+oracle_stud@hades:~> cd /app/oracle_stud/oradata/dbarc02/cold_backup
+oracle_stud@hades:/app/oracle_stud/oradata/dbarc02/cold_backup> cp -R *.dbf ../data
+
+//Zustand wiederherstellen
+SQL> STARTUP MOUNT
+ORACLE instance started.
+
+Total System Global Area  417546240 bytes
+Fixed Size                  2213936 bytes
+Variable Size             343934928 bytes
+Database Buffers           62914560 bytes
+Redo Buffers                8482816 bytes
+Database mounted.
+
+SQL> ALTER DATABASE RECOVER DATABASE
+  2  UNTIL TIME '2013-06-23:18:41:09';
+
+Database altered.
+
+//Logs zurücksetzen
+SQL> ALTER DATABASE OPEN RESETLOGS;
+
+Database altered.
+
+//Situation prüfen
+SQL> CONNECT scott/tiger
+Error accessing PRODUCT_USER_PROFILE
+Warning:  Product user profile information not loaded!
+You may need to run PUPBLD.SQL as SYSTEM
+Connected.
+SQL> SELECT COUNT(*) FROM emp;
+
+  COUNT(*)
+----------
+       112
+
+SQL> SELECT COUNT(*) FROM dept;
+
+  COUNT(*)
+----------
+        32
+
+SQL> desc viewing;
+ Name        Null?    Type
+ ----------------------------------------- -------- ---------------------------
+ EMPNO          NUMBER(4)
+ ENAME          VARCHAR2(10)
+ JOB          VARCHAR2(9)
+ MGR          NUMBER(4)
+ HIREDATE         DATE
+ SAL          NUMBER(7,2)
+ COMM          NUMBER(7,2)
+ DEPTNO          NUMBER(2)
+\end{lstlisting}
 
 \subsection{Versuch 2}
 \subsubsection{Cold-Backup Restore}
-\subsubsection{Arbeiten}
+Wir stellen der Zustand vor dem Versuch 1 wieder her:
+\begin{lstlisting}
+//Shutdown Instance
+SQL> CONNECT / as sysdba
+Connected.
+SQL> SHUTDOWN IMMEDIATE
+Database closed.
+Database dismounted.
+ORACLE instance shut down.
+
+//Restore .dbf Files
+oracle_stud@hades:~> cd /app/oracle_stud/oradata/dbarc02/cold_backup
+oracle_stud@hades:/app/oracle_stud/oradata/dbarc02/cold_backup> cp -R * ../data
+
+//Startup
+SQL> startup
+ORACLE instance started.
+
+Total System Global Area  417546240 bytes
+Fixed Size                  2213936 bytes
+Variable Size             343934928 bytes
+Database Buffers           62914560 bytes
+Redo Buffers                8482816 bytes
+Database mounted.
+Database opened.
+
+//Check
+SQL> select count(*) from scott.emp;
+
+  COUNT(*)
+----------
+        14
+\end{lstlisting}
+
+\subsubsection{Connect als Scott}
+\begin{lstlisting}
+SQL> connect scott/tiger
+Error accessing PRODUCT_USER_PROFILE
+Warning:  Product user profile information not loaded!
+You may need to run PUPBLD.SQL as SYSTEM
+Connected.
+\end{lstlisting}
+
+\subsubsection{Tabelle emp vergrössern}
+Da wir einen Primary Key auf emp haben, müssen wir das Skript anpassen:
+\begin{lstlisting}
+BEGIN
+  FOR i IN REVERSE 1..500 LOOP
+   INSERT INTO emp SELECT (select (min(empno)-1) from emp),ename,job,mgr,hiredate,sal,comm,deptno from emp;
+  END LOOP;
+END;
+COMMIT;
+SELECT COUNT(*) as “Count emp” FROM emp;
+SELECT COUNT(*) as “Count dept” FROM dept;
+SELECT TO_CHAR( SYSDATE, 'yyyy-MM-dd:HH24:MI:SS')
+FROM dual;
+
+ALTER SYSTEM SWITCH LOGFILE;
+\end{lstlisting}
+
+\subsubsection{Tabelle dept vergrössern}
+BEGIN
+  FOR i IN REVERSE 1..10 LOOP
+   INSERT INTO dept (deptno,dname,loc)
+   VALUES ((select (max(deptno)+1) from dept),'IT','Bern');
+  END LOOP;
+END;
+
+\subsubsection{Crash simulieren}
+
 \subsubsection{Reparatur}
 \subsubsection{System entlasten}
 
