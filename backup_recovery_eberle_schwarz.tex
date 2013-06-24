@@ -709,7 +709,7 @@ ORACLE instance shut down.
 oracle_stud@hades:~> cd /app/oracle_stud/oradata/dbarc02/data
 oracle_stud@hades:/app/oracle_stud/oradata/dbarc02/data> cp * ../cold_backup/
 
-//System entlasten, alte Dateien löschen
+//System entlasten, alte Dateien loeschen
 oracle_stud@hades:~>cd /app/oracle_stud/oradata/dbarc02/archive
 oracle_stud@hades:/app/oracle_stud/oradata/dbarc02/archive>find . * -mtime +1 -exec rm {} \;
 
@@ -905,12 +905,12 @@ SQL> ALTER DATABASE RECOVER DATABASE
 
 Database altered.
 
-//Logs zurücksetzen
+//Logs zuruecksetzen
 SQL> ALTER DATABASE OPEN RESETLOGS;
 
 Database altered.
 
-//Situation prüfen
+//Situation pruefen
 SQL> CONNECT scott/tiger
 Error accessing PRODUCT_USER_PROFILE
 Warning:  Product user profile information not loaded!
@@ -943,7 +943,7 @@ SQL> desc viewing;
 
 \subsection{Versuch 2}
 \subsubsection{Cold-Backup Restore}
-Wir stellen der Zustand vor dem Versuch 1 wieder her:
+Wir stellen den Zustand vor dem Versuch 1 wieder her:
 \begin{lstlisting}
 //Shutdown Instance
 SQL> CONNECT / as sysdba
@@ -989,41 +989,544 @@ Connected.
 \subsubsection{Tabelle emp vergrössern}
 Da wir einen Primary Key auf emp haben, müssen wir das Skript anpassen:
 \begin{lstlisting}
+// Run as Scott
 BEGIN
-  FOR i IN REVERSE 1..500 LOOP
-   INSERT INTO emp SELECT (select (min(empno)-1) from emp),ename,job,mgr,hiredate,sal,comm,deptno from emp;
+  FOR i IN REVERSE 1..1000 
+  LOOP
+   INSERT INTO emp (empno,ename,job,mgr,hiredate,sal,comm,deptno) VALUES ((select (min(empno)-1) from emp),'blubb','blubb',7566,'08-SEP-81',1,0,10);
   END LOOP;
 END;
+/
+
+// Run as Scott
 COMMIT;
-SELECT COUNT(*) as “Count emp” FROM emp;
-SELECT COUNT(*) as “Count dept” FROM dept;
+SELECT COUNT(*) FROM emp;
+SELECT COUNT(*) FROM dept;
 SELECT TO_CHAR( SYSDATE, 'yyyy-MM-dd:HH24:MI:SS')
 FROM dual;
 
+// Run as sysdba
 ALTER SYSTEM SWITCH LOGFILE;
 \end{lstlisting}
 
+Dieses führen wir 10 mal aus, um 10 Archiv-Dateien zu erstellen.
+
 \subsubsection{Tabelle dept vergrössern}
+Auch bei der Tabelle dept musssten wir das Sktipt anpassen:
+\begin{lstlisting}
+// Run as Scott
 BEGIN
-  FOR i IN REVERSE 1..10 LOOP
+  FOR i IN REVERSE 1..50 LOOP
    INSERT INTO dept (deptno,dname,loc)
-   VALUES ((select (max(deptno)+1) from dept),'IT','Bern');
+   VALUES ((select (min(deptno)-1) from dept),'Dev','Aarau');
   END LOOP;
 END;
+/
+
+// Run as Scott
+COMMIT;
+SELECT COUNT(*) FROM emp;
+SELECT COUNT(*) FROM dept;
+SELECT TO_CHAR( SYSDATE, 'yyyy-MM-dd:HH24:MI:SS')
+FROM dual;
+
+// Run as sysdba
+ALTER SYSTEM SWITCH LOGFILE;
+\end{lstlisting}
+
+Dieses führen wir 2 mal aus, um 2 weitere Archiv-Dateien zu erstellen.
+
+\subsubsection{Übersicht Archive-Files}
+Wir notieren nun die erstellten Archive-Dateien, sowie die aktuelle Situation.
+
+\begin{center}
+    \begin{tabular}{| l | l | l | l | l |}
+    \hline
+	Nr. & Zeitpunkt & Count emp & Count dept & Archive-File abgeschlossen \\ \hline
+	D1 & 2013-06-24:19:17:34 & 1014 & 4 & 1\_253\_809526722.dbf \\ \hline
+	D2 & 2013-06-24:19:25:18 & 2014 & 4 & 1\_254\_809526722.dbf \\ \hline
+	D3 & 2013-06-24:19:28:30 & 3014 & 4 & 1\_255\_809526722.dbf \\ \hline
+	D4 & 2013-06-24:19:30:21 & 4014 & 4 & 1\_256\_809526722.dbf \\ \hline
+	D5 & 2013-06-24:19:31:13 & 5014 & 4 & 1\_257\_809526722.dbf \\ \hline
+	D6 & 2013-06-24:19:32:00 & 6014 & 4 & 1\_258\_809526722.dbf \\ \hline
+	D7 & 2013-06-24:19:32:42 & 7014 & 4 & 1\_259\_809526722.dbf \\ \hline
+	D8 & 2013-06-24:19:33:40 & 8014 & 4 & 1\_260\_809526722.dbf \\ \hline
+	D9 & 2013-06-24:19:34:33 & 9014 & 4 & 1\_261\_809526722.dbf \\ \hline
+	D10 & 2013-06-24:19:36:21 & 10014 & 4 & 1\_262\_809526722.dbf \\ \hline
+	D11 & 2013-06-24:19:39:50 & 10014 & 54 & 1\_263\_809526722.dbf \\ \hline
+	DDD & 2013-06-24:19:46:09 & 10014 & 104 & 1\_264\_809526722.dbf \\ \hline
+   \end{tabular}
+\end{center}
 
 \subsubsection{Crash simulieren}
+Wir haben die Tabellen erweitert und mehrere Archive-Dateien generiert. Nun können wir den Crash simulieren.
 
+\begin{lstlisting}
+SQL> connect / as sysdba
+Connected.
+
+SQL> SHUTDOWN ABORT;
+ORACLE instance shut down.
+\end{lstlisting}
 \subsubsection{Reparatur}
+Wir kopieren die .dbf Files in das data Verzeichnis uns stellen mithilfe der Archive Log Files den Zustand D10 wieder her:
+\begin{lstlisting}
+//Restore .dbf Files
+oracle_stud@hades:~> cd /app/oracle_stud/oradata/dbarc02/cold_backup
+oracle_stud@hades:/app/oracle_stud/oradata/dbarc02/cold_backup> cp -R *.dbf ../data
+
+//Restore until D10
+SQL> STARTUP MOUNT
+ORACLE instance started.
+
+Total System Global Area  417546240 bytes
+Fixed Size                  2213936 bytes
+Variable Size             343934928 bytes
+Database Buffers           62914560 bytes
+Redo Buffers                8482816 bytes
+Database mounted.
+
+
+SQL> RECOVER DATABASE UNTIL TIME '2013-06-24:19:36:21' USING BACKUP CONTROLFILE;
+ORA-00279: change 5716560 generated at 06/23/2013 17:53:12 needed for thread 1
+ORA-00289: suggestion :
+/app/oracle_stud/oradata/dbarc02/archive/1_253_809526722.dbf
+ORA-00280: change 5716560 for thread 1 is in sequence #253
+
+
+Specify log: {<RET>=suggested | filename | AUTO | CANCEL}
+
+ORA-00279: change 5744736 generated at 06/24/2013 06:05:11 needed for thread 1
+ORA-00289: suggestion :
+/app/oracle_stud/oradata/dbarc02/archive/1_254_809526722.dbf
+ORA-00280: change 5744736 for thread 1 is in sequence #254
+ORA-00278: log file
+'/app/oracle_stud/oradata/dbarc02/archive/1_253_809526722.dbf' no longer needed
+for this recovery
+
+
+Specify log: {<RET>=suggested | filename | AUTO | CANCEL}
+
+ORA-00279: change 5776405 generated at 06/24/2013 19:22:06 needed for thread 1
+ORA-00289: suggestion :
+/app/oracle_stud/oradata/dbarc02/archive/1_255_809526722.dbf
+ORA-00280: change 5776405 for thread 1 is in sequence #255
+ORA-00278: log file
+'/app/oracle_stud/oradata/dbarc02/archive/1_254_809526722.dbf' no longer needed
+for this recovery
+
+
+Specify log: {<RET>=suggested | filename | AUTO | CANCEL}
+
+ORA-00279: change 5777546 generated at 06/24/2013 19:25:29 needed for thread 1
+ORA-00289: suggestion :
+/app/oracle_stud/oradata/dbarc02/archive/1_256_809526722.dbf
+ORA-00280: change 5777546 for thread 1 is in sequence #256
+ORA-00278: log file
+'/app/oracle_stud/oradata/dbarc02/archive/1_255_809526722.dbf' no longer needed
+for this recovery
+
+
+Specify log: {<RET>=suggested | filename | AUTO | CANCEL}
+
+ORA-00279: change 5778733 generated at 06/24/2013 19:28:50 needed for thread 1
+ORA-00289: suggestion :
+/app/oracle_stud/oradata/dbarc02/archive/1_257_809526722.dbf
+ORA-00280: change 5778733 for thread 1 is in sequence #257
+ORA-00278: log file
+'/app/oracle_stud/oradata/dbarc02/archive/1_256_809526722.dbf' no longer needed
+for this recovery
+
+
+Specify log: {<RET>=suggested | filename | AUTO | CANCEL}
+
+ORA-00279: change 5779827 generated at 06/24/2013 19:30:53 needed for thread 1
+ORA-00289: suggestion :
+/app/oracle_stud/oradata/dbarc02/archive/1_258_809526722.dbf
+ORA-00280: change 5779827 for thread 1 is in sequence #258
+ORA-00278: log file
+'/app/oracle_stud/oradata/dbarc02/archive/1_257_809526722.dbf' no longer needed
+for this recovery
+
+
+Specify log: {<RET>=suggested | filename | AUTO | CANCEL}
+
+ORA-00279: change 5780880 generated at 06/24/2013 19:31:36 needed for thread 1
+ORA-00289: suggestion :
+/app/oracle_stud/oradata/dbarc02/archive/1_259_809526722.dbf
+ORA-00280: change 5780880 for thread 1 is in sequence #259
+ORA-00278: log file
+'/app/oracle_stud/oradata/dbarc02/archive/1_258_809526722.dbf' no longer needed
+for this recovery
+
+
+Specify log: {<RET>=suggested | filename | AUTO | CANCEL}
+
+ORA-00279: change 5781938 generated at 06/24/2013 19:32:24 needed for thread 1
+ORA-00289: suggestion :
+/app/oracle_stud/oradata/dbarc02/archive/1_260_809526722.dbf
+ORA-00280: change 5781938 for thread 1 is in sequence #260
+ORA-00278: log file
+'/app/oracle_stud/oradata/dbarc02/archive/1_259_809526722.dbf' no longer needed
+for this recovery
+
+
+Specify log: {<RET>=suggested | filename | AUTO | CANCEL}
+
+ORA-00279: change 5782997 generated at 06/24/2013 19:33:09 needed for thread 1
+ORA-00289: suggestion :
+/app/oracle_stud/oradata/dbarc02/archive/1_261_809526722.dbf
+ORA-00280: change 5782997 for thread 1 is in sequence #261
+ORA-00278: log file
+'/app/oracle_stud/oradata/dbarc02/archive/1_260_809526722.dbf' no longer needed
+for this recovery
+
+
+Specify log: {<RET>=suggested | filename | AUTO | CANCEL}
+
+ORA-00279: change 5784059 generated at 06/24/2013 19:34:09 needed for thread 1
+ORA-00289: suggestion :
+/app/oracle_stud/oradata/dbarc02/archive/1_262_809526722.dbf
+ORA-00280: change 5784059 for thread 1 is in sequence #262
+ORA-00278: log file
+'/app/oracle_stud/oradata/dbarc02/archive/1_261_809526722.dbf' no longer needed
+for this recovery
+
+
+Specify log: {<RET>=suggested | filename | AUTO | CANCEL}
+
+ORA-00279: change 5785121 generated at 06/24/2013 19:34:57 needed for thread 1
+ORA-00289: suggestion :
+/app/oracle_stud/oradata/dbarc02/archive/1_263_809526722.dbf
+ORA-00280: change 5785121 for thread 1 is in sequence #263
+ORA-00278: log file
+'/app/oracle_stud/oradata/dbarc02/archive/1_262_809526722.dbf' no longer needed
+for this recovery
+
+
+Specify log: {<RET>=suggested | filename | AUTO | CANCEL}
+CANCEL
+Media recovery cancelled.
+\end{lstlisting}
+
+Nun überprüfen wir, ob der richtige Zeitpunkt gewählt wurde, um den Restore abzubrechen.
+
+\begin{lstlisting}
+SQL> ALTER DATABASE OPEN READ ONLY;
+
+Database altered.
+
+SQL> select count(*) from scott.emp;
+
+  COUNT(*)
+----------
+      9014
+
+SQL> select count(*) from scott.dept;
+
+  COUNT(*)
+----------
+         4
+\end{lstlisting}
+
+Wir wollen den Zustand unmittelbar vor dem vergrössern der dept Tabelle widerherstellen. Dazu müssen wir also noch ein weiteres Archive-Log wiederherstellen:
+\begin{lstlisting}
+SQL> SHUTDOWN
+Database closed.
+Database dismounted.
+ORACLE instance shut down.
+SQL> STARTUP MOUNT
+ORACLE instance started.
+
+Total System Global Area  417546240 bytes
+Fixed Size                  2213936 bytes
+Variable Size             343934928 bytes
+Database Buffers           62914560 bytes
+Redo Buffers                8482816 bytes
+Database mounted.
+SQL> RECOVER DATABASE UNTIL TIME '2013-06-24:19:36:21' USING BACKUP CONTROLFILE;
+ORA-00279: change 5785121 generated at 06/24/2013 19:34:57 needed for thread 1
+ORA-00289: suggestion :
+/app/oracle_stud/oradata/dbarc02/archive/1_263_809526722.dbf
+ORA-00280: change 5785121 for thread 1 is in sequence #263
+
+
+Specify log: {<RET>=suggested | filename | AUTO | CANCEL}
+
+Log applied.
+Media recovery complete.
+\end{lstlisting}
+
+Wir überprüfen nun wiederum die Situation, diese sollte dem Zustand vor dem Vergrössern der dept Tabelle entsprechen:
+
+\begin{lstlisting}
+SQL> select count(*) from scott.emp;
+
+  COUNT(*)
+----------
+     10014
+
+SQL> select count(*) from scott.dept;
+
+  COUNT(*)
+----------
+         4
+\end{lstlisting}
+
+Alternativ zu der von uns gewählten Methode der Wiederherstellung, kann einfach mit 'RECOVER DATABASE UNTIL CANCEL USING BACKUP CONTROLFILE' die Wiederherstellung gestartet werden, wenn man den Zeitpunkt nicht genau weiss. Dabei muss immer wieder überprüft werden, ob der gwünschte Zustand bereits erreicht ist oder nicht.
+
+Bei der von uns gewählten Methode mit 'UNTIL TIME ..' kann mit 'AUTO' direkt bis zum vorgeschlagenen Zeitpunkt wiederhergestellt werden.
+
+Da wir nun den gewünschten Zustand wiederhergestellt haben, können wir die weiteren Archive-Log Files löschen:
+
+\begin{lstlisting}
+SQL> ALTER DATABASE OPEN RESETLOGS;
+
+Database altered.
+\end{lstlisting}
 \subsubsection{System entlasten}
+Da wir die beiden Versuche erfolgreich durchgeführt haben, löschen wir alle Archiv-Files und setzen die Datenbank in den noarchivelog Modus zurück. Die beiden Tabellen emp und dept werden ebenfalls gelöscht und neu erzeugt.
+
+\begin{lstlisting}
+CONNECT scott/tiger
+@/app/oracle_stud/admin/scripts/demobld.sql
+
+connect / as sysdba
+SQL> SHUTDOWN
+Database closed.
+Database dismounted.
+STARTUP MOUNT
+ORACLE instance shut down.
+SQL> ORACLE instance started.
+
+Total System Global Area  417546240 bytes
+Fixed Size                  2213936 bytes
+Variable Size             343934928 bytes
+Database Buffers           62914560 bytes
+Redo Buffers                8482816 bytes
+Database mounted.
+SQL> ALTER DATABASE NOARCHIVELOG;
+
+Database altered.
+
+SQL> ALTER DATABASE OPEN;
+
+Database altered.
+
+SQL> ARCHIVE LOG LIST;
+Database log mode              No Archive Mode
+Automatic archival             Disabled
+Archive destination            /app/oracle_stud/oradata/dbarc02/archive
+Oldest online log sequence     1
+Current log sequence           1
+
+
+oracle_stud@hades:/app/oracle_stud/oradata/dbarc02/archive> ls -la
+total 76124
+drwxr-xr-x 2 oracle_stud oinstall     4096 2013-06-24 20:12 .
+drwxr-xr-x 6 oracle_stud oinstall     4096 2013-03-08 10:10 ..
+-rw-r----- 1 oracle_stud oinstall 39293440 2013-06-24 06:05 1_253_809526722.dbf
+-rw-r----- 1 oracle_stud oinstall 32441344 2013-06-24 19:22 1_254_809526722.dbf
+-rw-r----- 1 oracle_stud oinstall   656896 2013-06-24 19:25 1_255_809526722.dbf
+-rw-r----- 1 oracle_stud oinstall   728064 2013-06-24 19:28 1_256_809526722.dbf
+-rw-r----- 1 oracle_stud oinstall   637952 2013-06-24 19:30 1_257_809526722.dbf
+-rw-r----- 1 oracle_stud oinstall   600576 2013-06-24 19:31 1_258_809526722.dbf
+-rw-r----- 1 oracle_stud oinstall   619008 2013-06-24 19:32 1_259_809526722.dbf
+-rw-r----- 1 oracle_stud oinstall   602624 2013-06-24 19:33 1_260_809526722.dbf
+-rw-r----- 1 oracle_stud oinstall   627712 2013-06-24 19:34 1_261_809526722.dbf
+-rw-r----- 1 oracle_stud oinstall   628736 2013-06-24 19:34 1_262_809526722.dbf
+-rw-r----- 1 oracle_stud oinstall   666112 2013-06-24 19:36 1_263_809526722.dbf
+-rw-r----- 1 oracle_stud oinstall   173056 2013-06-24 20:12 1_264_809526722.dbf
+-rw-r----- 1 oracle_stud oinstall    97280 2013-06-24 20:12 1_265_809526722.dbf
+-rw-r----- 1 oracle_stud oinstall    10752 2013-06-24 20:12 1_266_809526722.dbf
+oracle_stud@hades:/app/oracle_stud/oradata/dbarc02/archive> rm *.dbf
+oracle_stud@hades:/app/oracle_stud/oradata/dbarc02/archive> ls -la
+total 8
+drwxr-xr-x 2 oracle_stud oinstall 4096 2013-06-24 20:27 .
+drwxr-xr-x 6 oracle_stud oinstall 4096 2013-03-08 10:10 ..
+
+\end{lstlisting}
+
 
 \section{Hot Backup}
 \subsection{Vorbereitung}
-\subsection{Arbeiten}
-\subsection{Backup}
-\subsection{Crash}
-\subsection{Reparatur}
-\subsection{Überprüfung}
+Wir überprüfen, ob die Datenbank im Archive-Modus läuft:
+\begin{lstlisting}
+SQL> ARCHIVE LOG LIST;
+Database log mode              No Archive Mode
+Automatic archival             Disabled
+Archive destination            /app/oracle_stud/oradata/dbarc02/archive
+Oldest online log sequence     1
+Current log sequence           1
+\end{lstlisting}
 
+Dies ist nicht der Fall, daher müssen wir die Datenbank in der Archive-Modus versetzen mit:
+\begin{lstlisting}
+SQL> SHUTDOWN immediate
+Database closed.
+Database dismounted.
+ORACLE instance shut down.
+
+SQL>  STARTUP MOUNT;
+ORACLE instance started.
+
+Total System Global Area  417546240 bytes
+Fixed Size                  2213936 bytes
+Variable Size             343934928 bytes
+Database Buffers           62914560 bytes
+Redo Buffers                8482816 bytes
+Database mounted.
+
+SQL> ALTER database archivelog;
+
+Database altered.
+
+SQL> ALTER database open;
+
+Database altered.
+\end{lstlisting}
+
+Zudem erstellen wir das Verzeichnis hot\_backup, in welches später unsere Backups gespeichert werden:
+\begin{lstlisting}
+oracle_stud@hades:/app/oracle_stud/oradata/dbarc02> mkdir hot_backup
+\end{lstlisting}
+\subsection{Arbeiten}
+Wir arbeiten als User Scott an der Tabelle emp.
+
+\begin{lstlisting}
+SQL> select count(*) from emp;
+
+  COUNT(*)
+----------
+        14
+
+SQL>  insert into emp SELECT (empno-1000),ename,job,mgr,hiredate,sal,comm,deptno FROM emp;
+
+14 rows created.
+
+SQL> select count(*) from emp;
+
+  COUNT(*)
+----------
+        28
+
+SQL> commit;
+
+Commit complete.
+
+SQL>  insert into emp SELECT (empno-1000),ename,job,mgr,hiredate,sal,comm,deptno FROM emp;
+
+28 rows created.
+
+SQL> select count(*) from emp;
+
+  COUNT(*)
+----------
+        56
+\end{lstlisting}
+\subsection{Backup}
+Wir müssen zuerst herausfinden, in welchem Tablespace die Tabelle emp ist. Dazu führen wir folgendes SQL Skript aus:
+
+\begin{lstlisting}
+SQL> select t.table_name,t.tablespace_name,df.file_name from dba_tables t, dba_data_files df where t.tablespace_name = df.tablespace_name and table_name like 'EMP';
+
+TABLE_NAME                     TABLESPACE_NAME
+------------------------------ ------------------------------
+FILE_NAME
+--------------------------------------------------------------------------------
+EMP                            SYSTEM
+/app/oracle_stud/oradata/dbarc02/data/system01.dbf
+\end{lstlisting}
+
+Die Tabelle emp ist im Tablespace System. Diesen Tablespace können wir nun für das Backup vorbereiten:
+
+\begin{lstlisting}
+SQL> alter tablespace system begin backup;
+
+Tablespace altered.
+\end{lstlisting}
+
+Nun können wir ein hot\_backup des System Tablespaces ziehen:
+\begin{lstlisting}
+oracle_stud@hades:/app/oracle_stud/oradata/dbarc02> cd /app/oracle_stud/oradata/dbarc02/data
+oracle_stud@hades:/app/oracle_stud/oradata/dbarc02/data> cp system01.dbf ../hot_backup/
+
+oracle_stud@hades:/app/oracle_stud/oradata/dbarc02/data> ls -la ../hot_backup/
+total 363896
+drwxr-xr-x 2 oracle_stud oinstall      4096 2013-06-24 21:00 .
+drwxr-xr-x 7 oracle_stud oinstall      4096 2013-06-24 20:41 ..
+-rw-r----- 1 oracle_stud oinstall 372252672 2013-06-24 21:00 system01.dbf
+\end{lstlisting}
+
+Nun können wir den Tablespace wieder in den normalen Modus versetzen:
+
+\begin{lstlisting}
+SQL> alter tablespace system end backup;
+
+Tablespace altered.
+\end{lstlisting}
+
+Wir können nun noch einmal Daten ändern:
+
+\begin{lstlisting}
+SQL>  insert into emp SELECT (empno-1000),ename,job,mgr,hiredate,sal,comm,deptno FROM emp;
+
+56 rows created.
+
+SQL> select count(*) from emp;
+
+  COUNT(*)
+----------
+       112
+\end{lstlisting}
+
+\subsection{Crash}
+Wir simulieren nun einen Crash.
+
+\begin{lstlisting}
+SQL> connect / as sysdba
+Connected.
+
+SQL> SHUTDOWN ABORT;
+ORACLE instance shut down.
+\end{lstlisting}
+
+\subsection{Reparatur}
+Wir wollen nach dem Crash das Backup wiederherstellen. Dazu kopieren wir das hot\_backup in den data Ordner und führen anschliessend das Revocery durch:
+\begin{lstlisting}
+oracle_stud@hades:/app/oracle_stud/oradata/dbarc02> cd /app/oracle_stud/oradata/dbarc02/hot_backup
+oracle_stud@hades:/app/oracle_stud/oradata/dbarc02/hot_backup> cp system01.dbf ../data/
+
+// Als sysdba
+SQL> STARTUP MOUNT
+ORACLE instance started.
+
+Total System Global Area  417546240 bytes
+Fixed Size                  2213936 bytes
+Variable Size             343934928 bytes
+Database Buffers           62914560 bytes
+Redo Buffers                8482816 bytes
+Database mounted.
+
+SQL> RECOVER DATABASE;
+Media recovery complete.
+
+SQL> ALTER DATABASE OPEN;
+
+Database altered.
+\end{lstlisting}
+\subsection{Überprüfung}
+Zum Schluss prüfen wir die aktuelle Situation:
+
+\begin{lstlisting}
+SQL> select count(*) from emp;
+
+  COUNT(*)
+----------
+        28
+\end{lstlisting}
+
+Wir sehen, dass nur die Daten vorhanden sind, welche vor dem Backup auch commited wurden. Dies ist korrekt.
 \section{Reflexion}
 oh noez, schwarz?
 
