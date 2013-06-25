@@ -21,10 +21,12 @@
 \author{Yanick Eberle, Pascal Schwarz}
 \begin{document}
 \maketitle
-\vfill
+\newpage
 \tableofcontents
 
 \pagestyle{fancy}
+
+\newpage
 \section{Vorbereitung}
 \subsection{Kontrolle Dateien}
 Die genannten Files liegen bei uns im korrekten Pfad:
@@ -86,6 +88,7 @@ oracle_stud@hades:/app/oracle_stud/admin/dbarc02>
 \end{lstlisting}
 
 
+\newpage
 \section{Export / Import einer Tabelle}
 \subsection{Export}
 Nach der Anmeldung führen wir gemäss Aufgabenstellung den Export-Befehl im entsprechenden Verzeichnis aus und überprüfen mittels ls, dass die Files erzeugt wurden (da der Datenbank-Name mit unserer SID übereinstimmt, verwenden wir gleich diese exportierte Variable):
@@ -249,6 +252,7 @@ SQL> DESC emp;
 \end{lstlisting}
 
 
+\newpage
 \section{Export / Import einer Datenbank}
 \subsection{Export der Datenbank}
 Den Export der gesamtem Datenkbank haben wir mit dem exp-Befehl durchgeführt. Der Output umfasste ingesamt ca. 1300 Zeilen, daher haben wir hier einiges rausgeschnitten. Wir sehen, dass unter Anderem auch die Tabellen \glqq{}dep\grqq{} und \glqq{}emp\grqq{} des Benuzters scott exportiert wurden.
@@ -438,6 +442,7 @@ SQL> select * from dept;
 \end{lstlisting}
 
 
+\newpage
 \section{Cold Backup}
 \subsection{DB Stop}
 Wir fahren die DB gemäss Anleitung in der Aufgabenstellung herunter:
@@ -620,6 +625,7 @@ SQL> select count(*) from emp;
 \end{lstlisting}
 
 
+\newpage
 \section{Archive Mode}
 \subsection{Vorbereitung}
 \subsubsection{Archive-Mode aktivieren}
@@ -755,7 +761,7 @@ ERROR at line 1:
 ORA-00001: unique constraint (SCOTT.PK_EMP) violated
 \end{lstlisting}
 
-Da ein Unique Key vorhande ist, müssen wir das Skript ein wenig anpassen, um weitere Daten hinzuzufügen:
+Da ein Unique Key vorhanden ist, müssen wir das Skript ein wenig anpassen, um weitere Daten hinzuzufügen:
 \begin{lstlisting}
 SQL> insert into emp SELECT (empno/2),ename,job,mgr,hiredate,sal,comm,deptno FROM emp;
 
@@ -876,6 +882,8 @@ TO_CHAR(SYSDATE,'YYYY-MM-DD:HH24:MI:SS')
 \subsubsection{Reparatur}
 Wir wollen die Datenbank reparieren. Dies machen wir, indem wir die Instanz herunterfahren, die *.dbf Dateien des Cold-Backups zurückholen und die Instanz wieder starten. Anschliessend fahren wir mit den Archive-Logs auf den Zeitpunkt B und prüfen die Situation.
 
+Wir sehen, dass die in den Tabellen \emph{emp} und \emph{dept} vorgenommenen Änderungen (vor dem Zeitpunkt B) sichtbar sind, aber dass die Tabelle \emph{viewing} noch nicht gelöscht wurde (fand nach Zeitpunkt B statt).
+
 \begin{lstlisting}
 //Shutdown Instance
 SQL> CONNECT / as sysdba
@@ -987,7 +995,7 @@ Connected.
 \end{lstlisting}
 
 \subsubsection{Tabelle emp vergrössern}
-Da wir einen Primary Key auf emp haben, müssen wir das Skript anpassen:
+Da wir einen Primary Key auf \emph{emp} haben, müssen wir das Skript anpassen:
 \begin{lstlisting}
 // Run as Scott
 BEGIN
@@ -1229,7 +1237,7 @@ SQL> select count(*) from scott.dept;
          4
 \end{lstlisting}
 
-Wir wollen den Zustand unmittelbar vor dem vergrössern der dept Tabelle widerherstellen. Dazu müssen wir also noch ein weiteres Archive-Log wiederherstellen:
+Wir wollen den Zustand unmittelbar vor dem Vergrössern von \emph{dept} widerherstellen. Dazu müssen wir also noch ein weiteres Archive-Log wiederherstellen:
 \begin{lstlisting}
 SQL> SHUTDOWN
 Database closed.
@@ -1257,7 +1265,7 @@ Log applied.
 Media recovery complete.
 \end{lstlisting}
 
-Wir überprüfen nun wiederum die Situation, diese sollte dem Zustand vor dem Vergrössern der dept Tabelle entsprechen:
+Wir überprüfen nun wiederum die Situation, diese sollte dem Zustand vor dem Vergrössern von \emph{dept} entsprechen:
 
 \begin{lstlisting}
 SQL> select count(*) from scott.emp;
@@ -1348,6 +1356,7 @@ drwxr-xr-x 6 oracle_stud oinstall 4096 2013-03-08 10:10 ..
 \end{lstlisting}
 
 
+\newpage
 \section{Hot Backup}
 \subsection{Vorbereitung}
 Wir überprüfen, ob die Datenbank im Archive-Modus läuft:
@@ -1386,12 +1395,12 @@ SQL> ALTER database open;
 Database altered.
 \end{lstlisting}
 
-Zudem erstellen wir das Verzeichnis hot\_backup, in welches später unsere Backups gespeichert werden:
+Zudem erstellen wir das Verzeichnis \emph{hot\_backup}, in welches später unsere Backups gespeichert werden:
 \begin{lstlisting}
 oracle_stud@hades:/app/oracle_stud/oradata/dbarc02> mkdir hot_backup
 \end{lstlisting}
 \subsection{Arbeiten}
-Wir arbeiten als User Scott an der Tabelle emp.
+Wir arbeiten als User Scott an der Tabelle \emph{emp}.
 
 \begin{lstlisting}
 SQL> select count(*) from emp;
@@ -1425,7 +1434,7 @@ SQL> select count(*) from emp;
         56
 \end{lstlisting}
 \subsection{Backup}
-Wir müssen zuerst herausfinden, in welchem Tablespace die Tabelle emp ist. Dazu führen wir folgendes SQL Skript aus:
+Wir müssen zuerst herausfinden, in welchem Tablespace \emph{emp} ist. Dazu führen wir folgendes SQL Skript aus:
 
 \begin{lstlisting}
 SQL> select t.table_name,t.tablespace_name,df.file_name from dba_tables t, dba_data_files df where t.tablespace_name = df.tablespace_name and table_name like 'EMP';
@@ -1438,7 +1447,7 @@ EMP                            SYSTEM
 /app/oracle_stud/oradata/dbarc02/data/system01.dbf
 \end{lstlisting}
 
-Die Tabelle emp ist im Tablespace System. Diesen Tablespace können wir nun für das Backup vorbereiten:
+Die Tabelle \emph{emp} ist im Tablespace System. Diesen Tablespace können wir nun für das Backup vorbereiten:
 
 \begin{lstlisting}
 SQL> alter tablespace system begin backup;
@@ -1527,6 +1536,8 @@ SQL> select count(*) from emp;
 \end{lstlisting}
 
 Wir sehen, dass nur die Daten vorhanden sind, welche vor dem Backup auch commited wurden. Dies ist korrekt.
+
+\newpage
 \section{Reflexion}
 oh noez, schwarz?
 
