@@ -255,7 +255,7 @@ SQL> DESC emp;
 \newpage
 \section{Export / Import einer Datenbank}
 \subsection{Export der Datenbank}
-Den Export der gesamtem Datenkbank haben wir mit dem exp-Befehl durchgeführt. Der Output umfasste ingesamt ca. 1300 Zeilen, daher haben wir hier einiges rausgeschnitten. Wir sehen, dass unter Anderem auch die Tabellen \glqq{}dep\grqq{} und \glqq{}emp\grqq{} des Benuzters scott exportiert wurden.
+Den Export der gesamtem Datenkbank haben wir mit dem exp-Befehl durchgeführt. Der Output umfasste ingesamt ca. 1300 Zeilen, daher haben wir hier einiges rausgeschnitten. Wir sehen, dass unter Anderem auch die Tabellen \emph{dept} und \emph{emp} des Benuzters scott exportiert wurden.
 \lstinputlisting{backup_recovery/exp_db_output_cut.txt}
 
 Wir prüfen auch hier, ob die Export-Files gemäss unseren Vorstellungen erstellt wurden. Der Full-Dump ist um ein Vielfaches grösser als der zuvor erstellte Tabellenexport.
@@ -362,7 +362,7 @@ About to enable constraints...
 Import terminated successfully with warnings
 \end{lstlisting}
 
-Eine Analyse des Problems und des Dump-Files (einfaches anschauen mittels \emph{less}) ergab, dass die Tabellen \emph{dept} und \emph{emp} vor dem Export nicht im Users-Tablespace, sondern im System-Tablespace lagen. Da es ohne Umwege mit dem Utility \emph{imp} nicht möglich ist, die Tabellen des Benutzers in einen anderen Tablespace zu importieren, haben wir dem User Scott ebenfalls Platz auf dem System-Tablespace gegeben:
+Eine Analyse des Problems und des Dump-Files (einfaches Anschauen mittels \emph{less}) ergab, dass die Tabellen \emph{dept} und \emph{emp} vor dem Export nicht im Users-Tablespace, sondern im System-Tablespace lagen. Da es ohne Umwege mit dem Utility \emph{imp} nicht möglich ist, die Tabellen des Benutzers in einen anderen Tablespace zu importieren, haben wir dem User Scott ebenfalls Platz auf dem System-Tablespace gegeben:
 \begin{lstlisting}
 oracle_stud@hades:/app/oracle_stud/oradata/dbarc02/export> sqlplus system/manager
 
@@ -378,7 +378,7 @@ SQL> ALTER USER scott QUOTA UNLIMITED ON system;
 User altered.
 \end{lstlisting}
 
-Diese Anpassung haben wir nach einem erneuten Entfernen und Neu-Erstellung des Benutzers scott vorgenommen. Der Import läuft nun ordnungsgemäss durch:
+Diese Anpassung haben wir nach einem erneuten Entfernen und Neu-Erstellung des Benutzers Scott vorgenommen. Der Import läuft nun ordnungsgemäss durch:
 \begin{lstlisting}
 oracle_stud@hades:/app/oracle_stud/oradata/dbarc02/export> imp system/manager file=${ORACLE_SID}_full fromuser=scott touser=scott
 
@@ -543,7 +543,7 @@ ERROR:
 ORA-01075: you are currently logged on
 \end{lstlisting}
 
-Informationen von \url{http://bit.ly/btEuNm} haben uns dann allerdings weitergeholfen, so dass wir die Instanz doch noch abwürgen konnten:
+Informationen von \url{http://bit.ly/btEuNm} haben uns dann allerdings weitergeholfen, so dass wir die Instanz doch noch \glqq{}abwürgen\grqq{} konnten:
 \begin{lstlisting}
 oracle_stud@hades:/app/oracle_stud/oradata/dbarc02/data> sqlplus -prelim "/as sysdba"
 
@@ -601,7 +601,7 @@ Database mounted.
 Database opened.
 \end{lstlisting}
 
-\subsection{Test Benutzer scott}
+\subsection{Test Benutzer Scott}
 Wir können uns nun wieder als Scott verbinden und stellen fest, dass die Tabelle im Zustand zum Zeitpunkt des Cold-Backups wieder verfügbar ist.
 \begin{lstlisting}
 oracle_stud@hades:/app/oracle_stud/oradata/dbarc02/data> sqlplus scott/tiger
@@ -1539,9 +1539,12 @@ Wir sehen, dass nur die Daten vorhanden sind, welche vor dem Backup auch commite
 
 \newpage
 \section{Reflexion}
-oh noez, schwarz?
+Die Bearbeitung der Ausarbeitung \emph{Backup \& Recovery} war für uns aus mehreren Gründen interessant. Einerseits wurde dieses Thema im Unterricht und den Folien nur in geringem Umfang behandelt resp. gestreift, andererseits haben wir in unseren beruflichen Umfeldern zwar durchaus mit Datenbanken zu tun, verwenden für die Datensicherung aber primär \glqq{}Dump-artige\grqq{} Verfahren (\emph{BACKUP DATABASE ...} bei Microsoft SQL Server resp. \emph{mysqldump} bei MySQL).
 
-jap
+Diese Verfahren ähneln am ehesten der Oracle Variante \glqq{}Export / Import einer Datenbank\grqq{} welche in dieser Ausarbeitung betrachtet und angewandt wurde. Diese Möglichkeit bei Oracle erschien uns im Vergleich zu den anderen genannten Systemen etwas komplexer.
 
+Die Aufgaben der Ausarbeitung sind relativ einfach zu lösen gewesen. Schade dünkte uns, dass die Schwierigkeiten teilweise eher dadurch entstanden, dass die exakten Befehle der Aufgabenstellung von leicht anderen Gegebenheiten ausgegangen sind, als diese auf unserem System vorzufinden waren (anderer Tablespace der Tabellen \emph{emp} und \emph{dept} bei \glqq{}Export / Import einer Datenbank\grqq{} und vorhandene Unique Constraints bzw. Primary Keys, welche die vorgegebenen Queries zum \glqq{}Aufblasen\grqq{} der Datenbank fehlschlagen liessen).
+
+Alles in allem sind wir froh, mit dieser Ausarbeitung ein weiteres für den Betrieb einer Datenbank(-Anwendung) wichtiges Thema vertieft und diverse Varianten der Sicherung und Wiederherstellung der Daten kennengelernt zu haben.
 
 \end{document}
