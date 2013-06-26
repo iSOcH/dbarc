@@ -362,7 +362,9 @@ About to enable constraints...
 Import terminated successfully with warnings
 \end{lstlisting}
 
-Eine Analyse des Problems und des Dump-Files (einfaches Anschauen mittels \emph{less}) ergab, dass die Tabellen \emph{dept} und \emph{emp} vor dem Export nicht im Users-Tablespace, sondern im System-Tablespace lagen. Da es ohne Umwege mit dem Utility \emph{imp} nicht möglich ist, die Tabellen des Benutzers in einen anderen Tablespace zu importieren, haben wir dem User Scott ebenfalls Platz auf dem System-Tablespace gegeben:
+Eine Analyse des Problems und des Dump-Files (einfaches Anschauen mittels \emph{less}) ergab, dass die Tabellen \emph{dept} und \emph{emp} vor dem Export nicht im Users-Tablespace, sondern im System-Tablespace lagen. Da es ohne Umwege mit dem Utility \emph{imp} nicht möglich ist (vgl. \url{http://www.odi.ch/weblog/posting.php?posting=344}, die Tabellen des Benutzers in einen anderen Tablespace zu importieren, haben wir dem User Scott ebenfalls Platz auf dem System-Tablespace gegeben.
+
+Eine andere Möglichkeit bei der Verwendung der Tools \emph{exp} und \emph{imp} wäre in der ersten Antwort dieses Foren-Threads beschrieben: \url{https://forums.oracle.com/thread/500668}. Ebenfalls gibt es neuere Utilities (\emph{datapump}), welche die Möglichkeit bieten, den Import in einen anderen Tablespace zu schreiben.
 \begin{lstlisting}
 oracle_stud@hades:/app/oracle_stud/oradata/dbarc02/export> sqlplus system/manager
 
